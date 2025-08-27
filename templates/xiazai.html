@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>验证下载</title>
+    <style>
+        /* 自定义样式 */
+        body {
+            background-color: #0f0f14; /* 深色背景 */
+            color: #fff;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .navbar {
+            background-color: #000;
+        }
+
+        .navbar .logo {
+            color: #fff;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .navbar .nav-link {
+            color: #fff !important;
+        }
+
+        .navbar .nav-link:hover,
+        .navbar .nav-link:focus,
+        .navbar .nav-link.active {
+            color: #ccc !important;
+        }
+
+        .hero {
+            padding: 100px 0;
+            background-color: #0f0f14;
+            color: #fff;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+
+        .hero p {
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+
+        .section {
+            padding: 50px 0;
+            margin: 20px auto;
+            background-color: #1a1a1f; /* 与背景色同色系但更亮 */
+            border-radius: 15px; /* 圆角效果 */
+            max-width: 1200px;
+            width: 90%;
+            opacity: 0; /* 初始透明度为0 */
+            transform: translateX(-100%); /* 初始位置向左偏移 */
+            animation: fadeInLeft 1s ease-out forwards; /* 淡出动画 */
+        }
+
+        .section:nth-child(even) {
+            transform: translateX(100%); /* 偶数卡片初始位置向右偏移 */
+            animation-name: fadeInRight; /* 偶数卡片从右淡出 */
+        }
+
+        .section.visible {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .section .container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .section .content {
+            flex: 1;
+            padding: 0 20px;
+        }
+
+        .section img {
+            width: 40%; /* 图片宽度 */
+            border-radius: 10px; /* 图片圆角 */
+        }
+
+        .section:nth-child(even) .container {
+            flex-direction: row-reverse; /* 偶数卡片图片在左，文字在右 */
+        }
+
+        .btn-custom {
+            color: #fff;
+            border-color: #fff;
+            background-color: transparent;
+            padding: 10px 20px;
+            border-radius: 20px;
+        }
+
+        .btn-custom:hover {
+            background-color: #fff;
+            color: #000;
+        }
+
+        /* 从左淡出动画 */
+        @keyframes fadeInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* 从右淡出动画 */
+        @keyframes fadeInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* 延迟动画 */
+        .section:nth-child(1) {
+            animation-delay: 0.2s;
+        }
+        .section:nth-child(2) {
+            animation-delay: 0.4s;
+        }
+        .section:nth-child(3) {
+            animation-delay: 0.6s;
+        }
+        .section:nth-child(4) {
+            animation-delay: 0.8s;
+        }
+    </style>
+</head>
+<body>
+   <header>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{{ url_for('main') }}">
+                <div class="logo">音艺智创 Metaverse Music Education</div>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('overview') }}">概览</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('news') }}">新闻</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('forum') }}">论坛</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('learn') }}">学习</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('charfront') }}">智能助手</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('xiazai') }}">下载</a></li>
+                </ul>
+                <div class="d-flex">
+                    {% if session.get('username') %}
+                        <div class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                {{ session.get('username') }}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                                <li><a class="dropdown-item" href="{{ url_for('user_setting') }}">设置</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{{ url_for('logout') }}">退出</a></li>
+                            </ul>
+                        </div>
+                    {% else %}
+                        <a class="btn btn-outline-light" href="/login" role="button">登录</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+</header>
+
+    <main>
+     <section class="hero">
+            <div class="container">
+                <h1 style="color:#d0d0d0">元宇宙音乐博物馆</h1>
+            </div>
+        </section>
+
+                <section class="section">
+            <div class="container">
+                <img src="/static/x_1.png" alt="……">
+                <div class="content">
+                    <h2>展厅布局：</h2>
+                    <p>博物馆设有多个展厅，分别展示不同类型乐器，涵盖古典乐器、现代乐器等，从钢琴到吉他，应有尽有。</p>
+                </div>
+            </div>
+        </section>
+
+
+        <section class="section">
+            <div class="container">
+                <img src="/static/x_2.png" alt="……">
+                <div class="content">
+                    <h2>智能机器人：</h2>
+                    <p>馆内有个跟随式智能机器人，接入大模型，能解答乐器相关问题，像起源、演奏技巧等。</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="container">
+                <img src="/static/x_3.png" alt="……">
+                <div class="content">
+                    <h2>互动体验：</h2>
+                    <p>提供丰富互动，可模拟弹奏吉他、钢琴、架子鼓，还能观看乐器视频与 PPT 简介。</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="hero">
+            <div class="container">
+                <h1 style="color:#d0d0d0">请输入验证码以下载文件</h1>
+                {% if error %}
+                    <p style="color: red;">{{ error }}</p>
+                {% endif %}
+                <form action="/verify" method="post">
+                    <label for="code" style="color:white">验证码:</label>
+                    <input type="text" id="code" name="code" required>
+                    <button type="submit">验证并下载</button>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

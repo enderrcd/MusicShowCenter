@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>新闻</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #222;
+            color: white;
+            margin: 0;
+            padding: 0;
+        }
+        .header {
+            text-align: center;
+            padding: 50px 0;
+        }
+        .header h1 {
+            font-size: 36px;
+            margin-bottom: 20px;
+        }
+        .header p {
+            font-size: 14px;
+            color: #aaa;
+        }
+        .tags {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .tags a {
+            display: inline-block;
+            margin: 5px;
+            padding: 5px 10px;
+            background-color: #444;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        .content {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .content img {
+            width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{{ url_for('main') }}">
+                <div class="logo">音艺智创 Metaverse Music Education</div>
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('overview') }}">概览</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('news') }}">新闻</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('forum') }}">论坛</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('learn') }}">学习</a></li>
+                </ul>
+
+                <!-- 登录/用户名显示 -->
+                <div class="d-flex">
+                    {% if session.get('username') %}
+                        <div class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                {{ session.get('username') }}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                                <li><a class="dropdown-item" href="{{ url_for('user_setting') }}">设置</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{{ url_for('logout') }}">退出</a></li> <!-- 确保有注销的路由 -->
+                            </ul>
+                        </div>
+                    {% else %}
+                        <a class="btn btn-outline-light" href="/login" role="button">登录</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+</header>
+
+<main>
+    <div class="header">
+        <h1>让音乐触手可及！全国首个高校常规音乐课程的虚拟平台即将上线</h1>
+        <p>2023.10.16</p>
+    </div>
+    <div class="content">
+
+        <p>与音乐大师面对面授课交流是很多学生和音乐爱好者的梦想，随着虚拟技术的发展，利用VR元宇宙的形式，随时随地地上一节零距离的大师课即将成为现实。近期，由南京师范大学音乐学院打造的人工智能虚拟教学平台即将上线。据悉，这也是全国首次将高校常规音乐课程建立在虚拟平台中。
+</p>
+        <img src="static/n_1.webp" alt="Image">
+        <h2>音乐教育与元宇宙的碰撞</h2>
+        <p>对于普通人而言，学习一门专业知识，最常见的方式就是走入课堂，但传统的课堂教学大多采用的是一对多的教学方式，教师并不能同时顾及每个学生，而学生也无法全方位地掌握教师说的每一个字。随着互联网的发展，视频教学弥补了课堂教学中的细节问题，学生可以反复播放视频并仔细地吸取知识，但视频教学缺乏临场互动，只有教师单向地授课，而近些年有着长足发展的网络授课，虽然可以不分地域的，一对一地解决学生的问题，但由于模式与技术的原因，从实际效果来看，无法从根本上大面积地推广。</p>
+        <p>随着数字技术的发展，以及虚拟教学平台的探索，如今以上问题均可以在VR元宇宙的技术中得以拓展，教师和学生以虚拟人的形式在平台中活动，既可以面对面授课，又打破了视频教学的单向输出，提高了互动性。同时更多的视频与图画技术可以无缝衔接进虚拟教学中，使授课的科技感和趣味性极大增强，教学效果显著提高。虚拟教学成为目前唯一能够集合各种教学模式的优点于一身的新型教学模式，全新的技术方式和前所未有的学习体验，让虚拟教学将成为未来教学发展中，最重要的手段和方向，也是科技发展为教育事业带来的全新变革。
+</p>
+        <img src="static/n_2.webp" alt="Image">
+        <h2>虚拟技术革新音乐教育</h2>
+        <p>南京师范大学人工智能虚拟教学平台于2022年12月开始设计研发，并于2023年7月和8月分别进行了两次研发试验，包括含动捕系统实验、VR技术实验、3D引擎实验、音乐类人工智能软件与APP实验、ChatGPT音乐教学应用研究等.</p>
+        <p>该平台由南京师范大学音乐学院联合南京师范大学计算机学院共同打造。平台系统拟定于2023年底至2024年2月正式上线，该项目也是全国高等院校中，首次将常规音乐课程在虚拟平台中建立并使用，对于音乐教育来说也是一种革命性的改变。</p>
+        <p>相比于传统教学方法，人工智能虚拟教学平台可以为学生提供一种沉浸式的、交互性极强的学习环境。学生可以在虚拟环境中对虚拟乐器进行操作，进而更好地理解音乐理论和乐器演奏技巧。而利用“虚幻5引擎”的强大图形处理能力，可以创建出例如音乐录音室、音乐会或者音乐课堂等真实的音乐表演和学习场景。</p>
+        <p>对于学生而言，可以根据自己的学习进度和偏好，提供个性化的教学内容和教学进度，使教学更有效。而虚拟学院无需真实的场地和乐器，一方面可以节省大量教学资源。另一方面学生可以在安全的环境中尝试各种音乐实验和创新，不用担心可能的风险和设备的损坏。从而可以让学生尝试新的乐器组合、新的音乐风格等，激发他们的创新精神和批判性思维。</p>
+        <img src="static/n_3.webp" alt="Image">
+        <P>从技术上来说，平台创新的VR技术，有效提高了学习的趣味性和学生的专注度。而利用AR或MR技术，学生可以模拟实际的演奏情景或学习乐器的操作方法，这在音乐教育和未来的艺术教学普及中都具有跨时代的意义。</P>
+        <P>另外，平台配备各类创新和辅助教学的系统，让教学成效显著提升，例如自动和声编配系统，对于钢琴即兴伴奏和中小学音乐教材的学习来说，可以更好地帮助学生理解和掌握和声编配的原理，大大提高了学生的音乐创作能力。</P>
+        <p>平台上线后，用户可以使用VR设备，在3D环境中沉浸式体验VR模式，另外平台也提供了PC模式和手机/平板模式，极大增强了移动性和便利性，让用户可以随时随地进行学习。</p>
+        <h2>未来将建成完备的虚拟学院</h2>
+        <p>南京师范大学作为国家“211工程”重点建设高校，其音乐学院历史悠久，前身可追溯到三江、两江师范学堂于1906年开设的图画手工科内的音乐课，近些年，学院通过对音乐教育理念的完善和创新，不断推动音乐教育的发展，建设了智慧教室、录音实验室、数码音乐实验室以及随园音乐厅等一批较为数字化的教学与实践场所，也为虚拟化教学平台奠定了良好的基础。由此，人工智能虚拟教学平台也在新文科理念指导下应运而生。</p>
+        <p>平台的建设初衷，就是希望将虚拟现实空间教学与现实教学相融合，进行创新的教学模式探索，最终搭建一个由开源3D引擎制作的虚拟教学平台，使教师与学生在虚拟空间中交互，并将各种音乐人工智能技术融入虚拟教学平台中。</p>
+        <p>据了解，平台目前开发的示范课为钢琴即兴伴奏课，在上线前后将陆续开发《人工智能虚拟教学数字音乐基础与应用》《世界乐器探索与实践》与音乐教育系列课程，最终目标实现学院70%的课程，都能在人工智能虚拟教学平台中应用。</p>
+        <p>另外，所有参与教学的教师与学生都会有专属自己的IP形象，而教师与学生还可以根据开发好的程序，自行打造自己在社区内的形象，并通过成绩绩点获取更多的外形与服装。此外，校外专家也可以依条件获取永久或临时的IP外形，不断扩大虚拟学院的专业性和趣味性。</p>
+        <img src="static/n_4.webp" alt="Image">
+        <p>未来，虚拟学院，除了实体学院的功能外，还将打通与元宇宙空间的通道，让虚拟教学空间融入虚拟社会，增设虚拟教务系统。同时，为了激励学生的学习，建设绩点商城（以考试成绩为货币交换更多功能道具）等。而在现有的音乐学院数字音乐资料馆的基础上，还将建设人工智能虚拟音乐资料馆，馆藏音乐、乐谱与教材可以全时以AR与MR的形式，为教师与学生提供辅助服务。</p>
+        <p>该平台的探索完善与建成上线，也将为全国其他高校和相关机构提供重要虚拟技术以及相关的场景应用。</p>
+
+    </div>
+    </main>
+</body>
+</html>

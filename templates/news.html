@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>新闻总览</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../static/styles.css">
+    <style>
+        body {
+            margin-top: 2rem; /* 增加页面顶部间距 */
+        }
+
+        .hero {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 4rem 2rem;
+            background-color: #000; /* 卡片背景颜色改为黑色 */
+            color: #fff; /* 文字颜色改为白色 */
+            border-radius: 1rem; /* 圆角效果 */
+            opacity: 0;
+            transform: translateX(100%);
+            animation: fadeInLeft 2s forwards, floatAnimation 3s infinite ease-in-out;
+            margin-bottom: 2rem; /* 卡片之间的间距 */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* 添加阴影效果 */
+            margin-left: 2rem; /* 左侧间距 */
+            margin-right: 2rem; /* 右侧间距 */
+        }
+
+        .hero:nth-child(2) {
+            animation-delay: 0.5s;
+        }
+
+        .hero:nth-child(3) {
+            animation-delay: 1s;
+        }
+
+        @keyframes fadeInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes floatAnimation {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .hero img {
+            max-width: 50%;
+            height: auto;
+        }
+
+        .hero .content {
+            width: 45%;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"></script>
+</head>
+<body>
+<header>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{{ url_for('main') }}">
+                <div class="logo">音艺智创 Metaverse Music Education</div>
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('overview') }}">概览</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('news') }}">新闻</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('forum') }}">论坛</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('learn') }}">学习</a></li>
+                </ul>
+
+                <!-- 登录/用户名显示 -->
+                <div class="d-flex">
+                    {% if session.get('username') %}
+                        <div class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                {{ session.get('username') }}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                                <li><a class="dropdown-item" href="{{ url_for('user_setting') }}">设置</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{{ url_for('logout') }}">退出</a></li> <!-- 确保有注销的路由 -->
+                            </ul>
+                        </div>
+                    {% else %}
+                        <a class="btn btn-outline-light" href="/login" role="button">登录</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+</header>
+
+<main>
+    <section class="hero">
+        <div class="content">
+            <h1>全国音乐元宇宙产教融合白皮书启动</h1>
+            <p>2024 年 1 月 12 日，百城市长公益论坛在京举办，会上由浙江艺术职业学院音乐学院牵头的全国音乐元宇宙产教融合白皮书正式启动。该白皮书将从音乐元宇宙的概念、技术、应用场景等多方面剖析，为产业界和教育界提供权威参考与决策依据，推动音乐元宇宙产教融合，助力我国音乐产业发展。 </p>
+            <a class="dropdown-item" href="/new_1">了解更多</a>
+        </div>
+        <img src="{{ url_for('static', filename='new_2.png') }}" alt="Unreal Engine Image" >
+    </section>
+
+    <section class="hero">
+        <div class="content">
+            <h1>南师大打造人工智能虚拟教学平台</h1>
+            <p>2023 年，南京师范大学音乐学院联合计算机学院打造的人工智能虚拟教学平台上线。这是全国首次将高校常规音乐课程建立在虚拟平台中，通过 VR、AR 等技术，学生可沉浸式体验音乐学习，操作虚拟乐器，在虚拟音乐场景中理解音乐理论和演奏技巧，平台还配备自动和声编配等辅助教学系统。 </p>
+                <a class="dropdown-item" href="/new_2">了解更多</a>
+        </div>
+        <img src="{{ url_for('static', filename='new_4.png') }}" alt="Unreal Engine Image" >
+    </section>
+
+    <section class="hero">
+        <div class="content">
+            <h1>NFT 音乐教育平台引领行业变革</h1>
+            <p>2024 年 9 月，据搜狐网消息，NFT 音乐教育平台作为区块链技术与音乐教育的创新结合，正引领新变革。未来趋势包括 AI 驱动的个性化学习体验深度定制、构建元宇宙中的音乐学院、采用 DAO 治理的音乐教育社区、开发音乐 NFT 衍生品等，将推动音乐教育向个性化、智能化、社交化发展。</p>
+            <a class="dropdown-item" href="/new_3">了解更多</a>
+        </div>
+        <img src="{{ url_for('static', filename='new_1.png') }}" alt="Unreal Engine Image" >
+    </section>
+
+
+    <section class="hero">
+        <div class="content">
+            <h1>AI 在音乐教育中的革命性突破</h1>
+            <p>据 2025 年《琴行经营报》总编郭星成文章，AI 在音乐教育中取得诸多突破，如智能音准矫正系统提升音准识别精度，三维运动捕捉教学精准量化演奏参数，虚拟乐团协作平台 NVIDIA Omniverse 打破时空限制实现跨地域合奏等，AI 正重构音乐教育的 “数字 - 物理” 混合教育生态。</p>
+            <a class="dropdown-item" href="/new_4">了解更多</a>
+        </div>
+        <img src="{{ url_for('static', filename='new_5.png') }}" alt="Unreal Engine Image" >
+    </section>
+</main>
+
+<footer>
+    <p>&copy; 音艺智创</p>
+</footer>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>新闻</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #222;
+            color: white;
+            margin: 0;
+            padding: 0;
+        }
+        .header {
+            text-align: center;
+            padding: 50px 0;
+        }
+        .header h1 {
+            font-size: 36px;
+            margin-bottom: 20px;
+        }
+        .header p {
+            font-size: 14px;
+            color: #aaa;
+        }
+        .tags {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .tags a {
+            display: inline-block;
+            margin: 5px;
+            padding: 5px 10px;
+            background-color: #444;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        .content {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .content img {
+            width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{{ url_for('main') }}">
+                <div class="logo">音艺智创 Metaverse Music Education</div>
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('overview') }}">概览</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('news') }}">新闻</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('forum') }}">论坛</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('learn') }}">学习</a></li>
+                </ul>
+
+                <!-- 登录/用户名显示 -->
+                <div class="d-flex">
+                    {% if session.get('username') %}
+                        <div class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                {{ session.get('username') }}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                                <li><a class="dropdown-item" href="{{ url_for('user_setting') }}">设置</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{{ url_for('logout') }}">退出</a></li> <!-- 确保有注销的路由 -->
+                            </ul>
+                        </div>
+                    {% else %}
+                        <a class="btn btn-outline-light" href="/login" role="button">登录</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+</header>
+
+<main>
+    <div class="header">
+        <h1>NFT，音乐行业的破局者</h1>
+    </div>
+    <div class="content">
+        <h2>一、艺术家塑造音乐，技术塑造音乐的未来</h2>
+        <p>回顾音乐产业，就是一部科技变化史。艺术家一直在塑造音乐，而科学技术一直在塑造音乐的未来。1877年，爱迪生发明留声机，这是人类历史上第一次能够用载体记录音乐。随着科技的进步，从黑胶唱片、钢丝录音机，磁带再到激光唱片，音乐的存在形式一直随着科技的进步在改变。而互联网时代下，音乐行业的两次技术突破更是让我们见证了技术对于音乐产业和音乐经济的巨大冲击。</p>
+        <p>第一次转变开始于唱片公司黄金时代的转折点。1999年，一家提供音乐在线服务的公司Napster首创了一种点对点 (P2P) 文件共享 Internet软件，允许音乐从CD储存转向MP3格式储存，这意味着各种数字音频文件能够被共享和下载。这极大的损害了以卖唱片为生的唱片公司的利益，2002年，Napster在国际五大唱片公司的起诉下宣告破产。</p>
+        <p>一个Napster倒下，但还有千千万万个“Napster”出现。更多类似的公司提供分享和免费下载服务。记录音乐的载体从CD转向MP3格式已势不可挡。在P2P 传输情况下，对于千万首歌曲的版权保护需要落实在无数小平台甚至是个人传输行为上，市场一片乱象。</p>
+        <p>当流媒体兴起时，音乐迎来了下一个时代。音乐被上传到云端，无需下载，用户就能够实时在线播放音乐。因此，一大波在线播放平台成为新的音乐消费平台，流量向头部聚拢，音乐版权维护得到了落实。目前，国内的流媒体平台包括QQ音乐、网易云音乐、酷狗音乐和百度音乐等。各大流媒体与唱片公司通过版权进行利益划分，但这样的模式似乎也开始被动摇。</p>
+        <p>NFT， 全称为Non-Fungible Token ，中文名为非同质化通证。非同质化即底层资产之间不能够自由分割和交换，因此能够赋予底层的实体资产或者数字资产唯一性的验证。自这个概念出现以来，NFT就以迅雷不及掩耳之势占据市场目光，在音乐行业也不例外。NFT是否能成为音乐行业下一个技术的突破口还未可知，但NFT已经向音乐行业注入了强大的活力。</p>
+        <h2>二、NFT音乐带来的全新体验</h2>
+        <p>音乐作为艺术品，有其鲜明的特征。一方面，与艺术画作相比，音乐在NFT的应用上能够承载更加丰富的内容。另一方面，音乐以数字代码的形式存在，这使得音乐的展现形式更加多样。从原声专辑、音乐会门票，到限量版体验，NFT把音乐产品玩出了花样。</p>
+        <p>胡彦斌《和尚》20周年纪念黑胶NFT开创了国内主流音乐平台发行数字藏品的先河。2021年8月15日，《和尚》纪念黑胶NFT在QQ音乐平台以数字藏品的形式限量发售。从“听”到“藏”，NFT让歌迷们能以全新的方式追星。据悉，近8万名歌迷参与抽签预约，一经发售便迅速抢空。</p>
+        <p>此次的纪念黑胶NFT记录了20年前未公开的DEMO版本的《和尚》，且仅发行的2001张以纪念创作年份。珍藏版本和有限发售使得纪念黑胶NFT成为高质量的数字藏品。此外，《和尚》NFT还能够提供给藏家沉浸式的体验。唱片360度可旋转放缩的设计充分还原了把玩体验，采用3D唱片机的仿真播放操作给足欣赏音乐仪式感。这些设计使得藏家有一种全新的音乐收藏体验。</p>
+        <img src="{{ url_for('static', filename='NFT_1.webp') }}" alt="NFT">
+        <p>此前，莱昂国王（Kings of Leon）于3月5日发行了名为 When You See Yourself 的NFT新专辑，这也是第一支以NFT发行专辑的乐队。此次发行的NFT是由乐队的长期创意合作伙伴Night After Night 设计的艺术作品，代币中的智能合约由NFT发行平台YellowHeart开发。</p>
+        <p>该新专辑发行包括三类NFT，一类是特别专辑套餐，提供包括实物版限量黑胶唱片、MP3格式的专辑下载和移动封面；一类是该乐队提供的六个独特的NFT代币，融合了精心制作的视听艺术；此外，最引人注目的是“金票”，这相当于一种终身VIP待遇，拥有者将获取保证终身观看任何一场莱昂国王音乐会的四张前排座位的权利，还提供包括私人司机、演出礼宾、演出前与乐队的私人聚会、专属休息室使用权以及每场演出中的一项商品摊位。
+</p>
+        <h2>三、重建音乐行业新秩序</h2>
+        <p>目前，发行音乐NFT已经成为音乐界的潮流，音乐界各种大咖纷纷追赶。国外有林肯公园主唱Mike Shinoda、Jay Z、Aphex Twin、Steve Aoki，国内有陶喆、陈奂仁和高嘉丰。接下来将会有更多的音乐创作者参与到NFT。</p>
+        <p>一方面，NFT为音乐行业带来了一套高效率的运行方式。传统方式下，音乐创作者需要依靠唱片公司以及流媒体平台来推出自己的产品。而区块链的公开、透明和可回溯特征允许以公平透明的方式重新建立音乐的制作、购买、销售、聆听和管理方式。这能够很好的解决音乐行业存在一些问题，如复杂的版税支付流程、假票和黄牛票带来的困扰、创作者无从追踪自己作品的流通等。</p>
+        <p>另一方面，NFT去中介化的特征消除了昂贵的中间商费用，从创作者的“原产地”转向面向粉丝的“零售店”，NFT搭建起了一套高效、安全的流通渠道。音乐创作者和粉丝之间的联系性更强，艺术家得到大部分的利润，粉丝能够享受更加丰富和便捷的体验。这是一种去中介化的新的商业模式，为更好的直接粉丝关系带来价值。</p>
+        <p>此外，NFT降低了音乐的进入门槛，使得更多有才华的音乐家能够展现自己，贫民窟的百万歌星不再是个例。一段名为EulerBeats Enigma LP 12的音乐，没有歌词，全程伴随着有节奏的鼓点以及低沉旋律，展现出来的高音质和全方位环绕体验似乎真的具有某种魔力，2分25秒的音乐达到8537925美元的售价。这段音乐NFT来自世界上最大的NFT发行和交易平台Opensea。平台上聚集了一群跃跃欲试的音乐创作者，各种各类的音乐创作层出不穷，该平台上目前已有超过8万个与音乐相关的NFT。</p>
+        <h2>四、音乐版权零售时代</h2>
+        <p>如果说单纯的以专辑形式贩卖，NFT只是换了形式的“唱片销售”；而当音乐版权也能通过NFT贩卖，那便会是一场对音乐行业的颠覆。音乐版权也称音乐著作权，是指音乐作品的创作者对其创作的作品依法享有的权利。主要包括：音乐作品的表演权、复制权、广播权、网络传输权等财产权利和署名权、保护作品完整权等精神权利。</p>
+        <p>音乐的生命力在于流通，流通基于版权，版权带来巨大利润。在此之前，通过版权获取收益是唱片公司或者头部流媒体的特殊权利，但这一局面或将迎来变革。NFT能够给版权提供作为数字资产权利的有效证明，继而让版权实现通证化。音乐创作者能够将自己音乐版权的份额制作成NFT，这也意味着粉丝能够通过购买版权NFT，与音乐创作者共享收益。</p>
+        <p>当版权能够以NFT的形式被购买时，那么以版权NFT为标的的市场也将会存在。NFT交易所给版权带来了流动性，版权的升值空间被经一步放大。创作者的议价能力不再被传统的唱片公司或者流媒体所限制，音乐家也能与支持他们的粉丝有更加密切的联系。当版权的潜力被激发，音乐市场将会涌现出新的活力。</p>
+        <p>将所有权和版权通证化后，音乐将有更强的金融属性。一方面，NFT拥有者能够通过底层的版权获得收入。另一方面，随着音乐创作者的出名，所有权和版权能够实现增值。这意味着音乐成为一种新的金融形式，能够提供现金流和资产增值。因此，各种金融产品的玩法能够被套用，音乐NFT的持有者能够通过出借获取利息，或者抵押获取贷款。音乐行业的想象力将被进一步激发。</p>
+        <p>Opulous ，被称为“去中心化的QQ音乐”，就是这样一个平台。允许音乐创作者发行音乐NFT，交易NFT，并且通过手中的NFT进行DeFi贷款，这改变了艺术家获得所需资金的方式，为音乐版权支持的 NFT提供了一个启动平台。</p>
+        <h2>五、音乐与NFT的相互成就</h2>
+        <p>国际唱片业协会（IFPI）首席执行官Frances Moore表示，“有些东西是永恒的，比如一首好歌的力量，或者艺术家和歌迷之间的联系。但是有些事情已经改变了。由于世界上大部分地区都处于封锁状态，现场音乐也被关闭，几乎在全球的每个角落，大多数粉丝都通过流媒体欣赏音乐。”尽管如此，根据IFPI统计，2020 年全球唱片音乐市场增长了 7.4%，这是连续第六年增长，2020 年的总收入为 216 亿美元。后疫情时代下，这样一个市场仍然是充满活力和想象力的。</p>
+        <p>用马克思的话说，“经济基础决定上层建筑”。经济是最基础的科学，而音乐是上层建筑中最巧妙、最抽象的存在。将底层基础和音乐上层联系起来的是科技。正是科技的存在，才使得短暂的“噪音”能够以系统化的数字符号的形式实现广泛和永久的传播。音乐本身也背负着时代的记号。从音乐的发展变迁历史，我们能够推出技术的演化过程。因此，如果谈到敬仰技术，音乐肯定是其中坚定不移的信徒之一。</p>
+        <p>NFT给音乐行业注入了鲜活的力量，允许音乐行业实验更多的发展可能性，且这种实验是具有颠覆性的。从所有权到版权、从玩家收藏到玩家投资、从实体到金融。音乐行业的生产关系有了一种全新的组成方式。虽然目前还是星星之火，但燎原之势的后果将会使音乐行业产生天翻地覆的变化，一种大众化、平民化、扁平化的音乐时代或将来临。</p>
+        <p>NFT能否实现音乐行业的第三次改革，这还需要时间来证明。目前还存在许多的不确定性，如老生常谈的泡沫问题，NFT还未被大众普遍接受，各种技术瓶颈有待突破等。但有趣的是，音乐是NFT的“镜子”，透过音乐，我们能够看到NFT这个概念真实的样子。音乐对技术发展的敏感性使得其天然能够验证NFT的成败与否。从这个意义上来，NFT和音乐的融合是一个相互成就的过程。</p>
+    </div>
+</main>
+</body>
+</html>

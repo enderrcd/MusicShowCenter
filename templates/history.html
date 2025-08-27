@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>乐器简史</title>
+<style>
+    body {
+        background-color: #000;
+        color: #ccc;
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+    }
+
+    h1,
+    h2,
+    h3 {
+        color: #fff;
+    }
+
+    .sidebar {
+        position: fixed;
+        top: 56px;
+        left: 0;
+        height: calc(100vh - 56px);
+        width: 200px;
+        background-color: #000;
+        padding: 20px;
+        overflow-y: auto;
+        z-index: 1000; /* 确保导航栏在最上层 */
+    }
+
+    .sidebar ul {
+        list-style-type: none;
+        padding: 0;
+    }
+
+    .sidebar ul li {
+        margin-bottom: 10px;
+    }
+
+    .sidebar ul li a {
+        color: #fff;
+        text-decoration: none;
+    }
+
+    .main-content {
+        margin-left: 220px; /* 为侧边栏留出空间 */
+        padding: 20px;
+        padding-bottom: 80px; /* 为进度条留出空间 */
+    }
+
+    .content-section {
+        display: flex;
+        justify-content: space-between;
+        align-items: center; /* 垂直居中对齐 */
+        margin-bottom: 40px; /* 每个部分之间的间距 */
+    }
+
+    .text-content {
+        flex: 1;
+        margin-right: 20px; /* 文字和图片之间的间距 */
+    }
+
+    .image-container {
+        flex: 1;
+        max-width: 50%;
+        transition: opacity 1s ease-in-out, transform 1s ease-in-out;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    #tutorialImage,
+    #tutorialImage2,
+    #tutorialImage3,
+    #tutorialImage4,
+    #tutorialImage5,
+    #tutorialImage6 {
+        max-width: 100%; /* 设置图片最大宽度为容器宽度 */
+        max-height: 400px; /* 根据需要可以设置固定最大高度 */
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    h2 {
+        cursor: pointer;
+        background-color: #444;
+        padding: 10px;
+        border-radius: 5px;
+        color: white;
+        margin-bottom: 20px;
+    }
+
+    .text-content p {
+        position: relative;
+        padding-left: 20px; /* 留出显示小圆点的空间 */
+        margin-bottom: 10px; /* 段落间距 */
+        cursor: pointer;
+    }
+
+    /* 默认的小圆点样式 */
+    .text-content p::before {
+        content: '';
+        position: absolute;
+        left: 5px;
+        top: 10px; /* 根据字体大小调整使小圆点垂直居中 */
+        width: 8px;
+        height: 8px;
+        background-color: gray;
+        border-radius: 50%;
+    }
+
+    /* 点击后的样式 */
+    .text-content p.clicked {
+        background-color: white; /* 改变为你想要的亮色 */
+        color: black;
+    }
+
+    .text-content p.clicked::before {
+        background-color: #4CAF50; /* 改变为你想要的亮色 */
+    }
+
+    .fade-out-left {
+        opacity: 0;
+        transform: translateX(-50%);
+    }
+
+    .fade-out-right {
+        opacity: 0;
+        transform: translateX(50%);
+    }
+
+    /* 进度条容器 */
+    .progress-container {
+        position: fixed;
+        bottom: 0;
+        left: 200px; /* 与侧边栏宽度一致 */
+        width: calc(100% - 200px); /* 减去侧边栏宽度 */
+        background-color: #333; /* 进度条背景色 */
+        padding: 10px;
+        z-index: 999; /* 确保进度条在导航栏下方 */
+    }
+
+    .progress-bar {
+        width: 100%;
+    }
+</style>
+
+</head>
+<body>
+<header>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{{ url_for('main') }}">
+                <div class="logo">音艺智创 Metaverse Music Education</div>
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('overview') }}">概览</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('news') }}">新闻</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('forum') }}">论坛</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('learn') }}">学习</a></li>
+                </ul>
+
+                <!-- 登录/用户名显示 -->
+                <div class="d-flex">
+                    {% if session.get('username') %}
+                        <div class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                {{ session.get('username') }}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                                <li><a class="dropdown-item" href="{{ url_for('user_setting') }}">设置</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{{ url_for('logout') }}">退出</a></li> <!-- 确保有注销的路由 -->
+                            </ul>
+                        </div>
+                    {% else %}
+                        <a class="btn btn-outline-light" href="/login" role="button">登录</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+</header>
+<div class="sidebar">
+    <ul>
+        <li><a href="#section1" >吉他</a></li>
+        <li><a href="#section2" >钢琴</a></li>
+        <li><a href="#section3" >架子鼓</a></li>
+        <li><a href="#section4" >萨克斯</a></li>
+        <li><a href="#section5" >小提琴</a></li>
+        <li><a href="#section6" >二胡</a></li>
+        <!-- 添加更多章节链接 -->
+    </ul>
+</div>
+
+<main class="main-content">
+    <div class="progress-container">
+        <input type="range" id="progressBar" min="0" max="100" value="0" class="progress-bar">
+    </div>
+    <div id="section1" class="content-section">
+        <div class="text-content">
+            <h2 id="learn_guitar">一、吉他：弦音中的岁月流转</h2>
+            <p onclick="changeImage('/static/history_1.png', 'right', 'tutorialImage'); toggleHighlight(this)">中世纪时，摩尔人将一种名为“乌德”的乐器带到伊比利亚半岛。</p>
+            <p onclick="changeImage('/static/history_2.jpg', 'right', 'tutorialImage'); toggleHighlight(this)">“乌德”对后来吉他的发展影响深远，在此基础上，逐渐形成了具有四根弦的拉丁吉他以及五根弦的比维拉琴。</p>
+            <p onclick="changeImage('/static/history_3.jpg', 'right', 'tutorialImage'); toggleHighlight(this)">到了16世纪，四弦吉他逐渐向六弦吉他过渡。随着时间的推移，六弦吉他的构造不断完善，琴颈变长，音孔变大，琴身的形状也逐渐固定下来。</p>
+            <p onclick="changeImage('/static/history_4.jpg', 'right', 'tutorialImage'); toggleHighlight(this)">18世纪至19世纪，西班牙的制琴师们对吉他进行了诸多改进，包括使用更优质的材料、优化内部结构等，让吉他的音色和音量都有了显著提升。</p>
+            <p onclick="changeImage('/static/history_5.jpg', 'right', 'tutorialImage'); toggleHighlight(this)">至此，现代意义上的吉他基本成型，而后在世界各地广泛传播，于不同音乐风格中展现独特魅力，成为了深受人们喜爱的乐器。</p>
+        </div>
+        <div class="image-container">
+            <img id="tutorialImage" src="/static/history_1.png" alt="教程相关图片">
+        </div>
+    </div>
+
+    <div id="section2" class="content-section">
+        <div class="image-container">
+            <img id="tutorialImage2" src="/static/history_6.jpg" alt="教程相关图片">
+        </div>
+        <div class="text-content">
+            <h2 id="learn_piano">二、钢琴：键盘上的音乐史诗</h2>
+            <p onclick="changeImage('/static/history_6.jpg', 'left', 'tutorialImage2'); toggleHighlight(this)">中世纪，出现了击弦古钢琴 “克拉维科德” 和拨弦古钢琴 “羽管键琴”，它们在不同方面为钢琴的诞生奠定了基础。“克拉维科德” 能通过控制按键力度产生音色变化，而 “羽管键琴” 则有着更宏大的音量，在当时的音乐生活中扮演着重要角色。</p>
+            <p onclick="changeImage('/static/history_7.jpg', 'left', 'tutorialImage2'); toggleHighlight(this)">1709 年，意大利的巴托罗密欧・克里斯托弗里带来了具有划时代意义的发明 ——“Pianoforte”，也就是钢琴。他巧妙地结合了 “克拉维科德” 和 “羽管键琴” 的优点，创造出了能根据按键力度展现丰富音量变化的全新乐器。这一发明标志着钢琴雏形的诞生，尽管当时的钢琴在构造和性能上还存在诸多不足。</p>
+            <p onclick="changeImage('/static/history_8.jpg', 'left', 'tutorialImage2'); toggleHighlight(this)">18 世纪到 19 世纪，是钢琴发展的关键时期。随着工业技术的进步，钢琴制造业迎来了重大变革。弦列的增加、铸铁框架的应用以及交叉弦列的设计等创新，让钢琴的音量变得更加宏大，音色更加丰富多样，稳定性也大幅提升。同时，这一时期涌现出了许多优秀的钢琴制造师，他们不断改进工艺，提升钢琴的品质。</p>
+            <p onclick="changeImage('/static/history_9.jpg', 'left', 'tutorialImage2'); toggleHighlight(this)">到了 19 世纪中叶，现代钢琴的基本结构和性能已然定型。钢琴凭借其宽广的音域、丰富的表现力，迅速在世界各地传播开来。在古典音乐领域，它成为了作曲家们钟爱的创作工具，众多伟大的钢琴作品应运而生；在演奏舞台上，钢琴家们用灵动的手指在琴键上跳跃，为观众带来一场场听觉盛宴。</p>
+            <p onclick="changeImage('/static/history_10.avif', 'left', 'tutorialImage2'); toggleHighlight(this)">如今，钢琴不仅是古典音乐殿堂中的瑰宝，在流行、爵士等多种音乐风格中也占据着重要地位。从庄严的音乐厅到温馨的家庭客厅，钢琴以其独特的魅力，成为了深受人们喜爱的 “乐器之王”，见证着音乐艺术的不断发展与传承。</p>
+        </div>
+    </div>
+
+    <div id="section3" class="content-section">
+        <div class="text-content">
+            <h2 id="learn_drum">三、架子鼓：激情节奏的诞生与进化</h2>
+            <p onclick="changeImage('/static/history_14.jpg', 'right', 'tutorialImage3'); toggleHighlight(this)">19 世纪，随着爵士乐在美国的兴起，音乐家们开始尝试将不同的打击乐器组合在一起，以创造出更加丰富多样的节奏效果。最初，一些爵士乐队会在舞台上同时使用大鼓、小鼓和手镲等乐器，由一名乐手分别演奏。这种组合形式逐渐演变成了早期的架子鼓雏形。</p>
+            <p onclick="changeImage('/static/history_11.jpg', 'right', 'tutorialImage3'); toggleHighlight(this)">19 世纪末 20 世纪初，发明家们对打击乐器进行了一系列的改进和创新。例如，踏板的发明使得鼓手可以用脚来控制大鼓的敲击，解放了双手，从而能够演奏出更加复杂的节奏型。同时，吊镲、踩镲等镲类乐器也被逐渐加入到这套打击乐器组合中。</p>
+            <p onclick="changeImage('/static/history_12.jpg', 'right', 'tutorialImage3'); toggleHighlight(this)">20 世纪 20 年代到 40 年代，是架子鼓快速发展和完善的时期。随着鼓的制作工艺不断进步，鼓腔的材质和设计得到优化，使得鼓的音色更加丰富饱满。架子鼓的基本配置也逐渐固定下来，通常包括一个低音大鼓、一个军鼓、几个嗵鼓、一个踩镲和一个或多个吊镲。</p>
+            <p onclick="changeImage('/static/history_13.avif', 'right', 'tutorialImage3'); toggleHighlight(this)">在这之后，架子鼓随着爵士乐、摇滚乐等音乐风格的传播而风靡全球。不同风格的音乐对架子鼓的演奏技巧和表现形式提出了新的要求，促使鼓手们不断创新和发展，进一步丰富了架子鼓的演奏方法和表现力。如今，架子鼓不仅是现代流行音乐中不可或缺的重要乐器，在古典音乐、电子音乐等领域也有着广泛的应用，成为了能够跨越多种音乐风格、深受人们喜爱的打击乐器。</p>
+        </div>
+        <div class="image-container">
+            <img id="tutorialImage3" src="/static/history_14.jpg" alt="教程相关图片">
+        </div>
+    </div>
+
+    <div id="section4" class="content-section">
+        <div class="image-container">
+            <img id="tutorialImage4" src="/static/history_15.jpg" alt="教程相关图片">
+        </div>
+        <div class="text-content">
+            <h2 id="learn_saxes">四、萨克斯：音色魅力的传奇之旅</h2>
+            <p onclick="changeImage('/static/history_15.jpg', 'left', 'tutorialImage4'); toggleHighlight(this)">1840年，比利时乐器制造家阿道夫·萨克斯发明了萨克斯。起初，萨克斯主要应用于军乐队，因其独特的音色和较大的音量，在军乐演奏中发挥着重要作用。19世纪末20世纪初，萨克斯在爵士乐领域找到了属于自己的舞台。爵士乐手们发现萨克斯能够演奏出极具感染力的滑音、颤音等技巧，与爵士乐强调即兴和情感表达的风格完美契合。从此，萨克斯成为了爵士乐的标志性乐器之一，众多爵士乐大师通过萨克斯演绎出了无数经典之作。</p>
+        </div>
+    </div>
+
+    <div id="section5" class="content-section">
+        <div class="text-content">
+            <h2 id="learn_violent">五、小提琴：意大利奏响的华丽乐章</h2>
+            <p onclick="changeImage('/static/history_16.jpg', 'right', 'tutorialImage5'); toggleHighlight(this)">16 世纪初，意大利的克雷莫纳、布雷西亚等地成为了小提琴制作的重要发源地。在这些地区，工匠们在之前弦乐器的基础上，创造出了更接近现代小提琴的雏形。此时的小提琴拥有四根弦，琴身的形状和构造也逐渐清晰，与早期的形态相比，在演奏性能和音色上都有了很大的提升。</p>
+            <p onclick="changeImage('/static/history_17.jpg', 'right', 'tutorialImage5'); toggleHighlight(this)">16 世纪至 18 世纪，意大利涌现出了许多杰出的小提琴制作家族，如阿玛蒂家族、斯特拉迪瓦里家族和瓜尔内里家族等。这些家族的制琴师们凭借精湛的技艺和对乐器制作的执着追求，对小提琴进行了精心的雕琢和改进。他们选用优质的木材，精心设计琴身的弧度、厚度以及音孔的形状等，使得小提琴的音色更加优美、纯净，音量也更为宏大，表现力得到了极大的增强。</p>
+            <p onclick="changeImage('/static/history_18.jpg', 'right', 'tutorialImage5'); toggleHighlight(this)">18 世纪以后，小提琴开始在欧洲各地广泛传播，不仅在古典音乐领域占据了重要地位，成为了交响乐团中不可或缺的乐器，还在民间音乐、舞蹈音乐等多种音乐形式中发挥着重要作用。同时，随着时间的推移，小提琴的制作工艺不断传承和发展，各地的制琴师们在意大利传统工艺的基础上，结合当地的文化和需求，对小提琴进行了一些个性化的改进和创新。</p>
+            <p onclick="changeImage('/static/history_19.jpg', 'right', 'tutorialImage5'); toggleHighlight(this)">如今，小提琴已经成为了世界上最具魅力和表现力的乐器之一，以其丰富的音色、灵动的演奏技巧，在各种音乐舞台上绽放光彩，深受广大音乐爱好者的喜爱和推崇。</p>
+        </div>
+        <div class="image-container">
+            <img id="tutorialImage5" src="/static/history_16.jpg" alt="教程相关图片">
+        </div>
+    </div>
+    <div id="section6" class="content-section">
+        <div class="image-container">
+            <img id="tutorialImage6" src="/static/history_20.jpg" alt="教程相关图片">
+        </div>
+        <div class="text-content">
+            <h2 id="learn_piano">六、二胡：华夏古韵中的弦音传承</h2>
+            <p onclick="changeImage('/static/history_20.jpg', 'left', 'tutorialImage6'); toggleHighlight(this)">二胡的前身可以追溯到唐代的 “奚琴”。当时，奚族是中国北方的一个少数民族，奚琴是他们所使用的一种乐器。奚琴的形制与现在的二胡有相似之处，它有两根弦，用竹片擦弦发音，在演奏方式和乐器构造上为后世二胡的发展奠定了基础。</p>
+            <p onclick="changeImage('/static/history_21.png', 'left', 'tutorialImage6'); toggleHighlight(this)">到了宋代，奚琴被称为 “嵇琴”，在演奏技巧和应用范围上有了进一步发展。宋代的嵇琴不仅在民间流传，也开始在宫廷音乐中出现，并且演奏者可以用手指按弦来改变音高，这是二胡演奏技术的一个重要进步。</p>
+            <p onclick="changeImage('/static/history_22.jpg', 'left', 'tutorialImage6'); toggleHighlight(this)">元朝时期，随着各民族文化的交流与融合，嵇琴逐渐吸收了其他民族乐器的特点，在形制和演奏方法上不断完善。拉弦乐器在这一时期进一步发展，为二胡的最终形成创造了条件。</p>
+            <p onclick="changeImage('/static/history_23.jpg', 'left', 'tutorialImage6'); toggleHighlight(this)">明清时期，二胡的形制已基本定型，并且在民间音乐、戏曲音乐等领域得到了广泛应用。在民间，二胡常常用于伴奏说唱音乐、民间歌舞等，成为了深受百姓喜爱的乐器之一。在戏曲中，二胡也成为了重要的伴奏乐器，不同的戏曲剧种根据自身的音乐风格对二胡进行了一些改良和调整，使其能够更好地配合戏曲的演唱。</p>
+            <p onclick="changeImage('/static/history_24.jpg', 'left', 'tutorialImage6'); toggleHighlight(this)">到了近现代，二胡在演奏技巧、制作工艺等方面都有了巨大的发展。许多音乐家和演奏家对二胡进行了深入的研究和创新，如刘天华先生，他借鉴西方音乐的创作手法，创作了一系列二胡独奏曲，极大地丰富了二胡的表现力，将二胡从民间伴奏乐器提升到了独奏乐器的地位。同时，制作工艺的进步也使得二胡的音质和音色得到了显著提高。</p>
+        </div>
+    </div>
+
+
+</main>
+</body>
+
+
+
+
+<script>
+    // 更换图片的函数（支持左右切换动画）
+    function changeImage(src, direction, imgId) {
+        var img = document.getElementById(imgId);
+
+        if (direction === 'right') {
+            img.classList.add('fade-out-right');
+            setTimeout(() => {
+                img.src = src;
+                img.classList.remove('fade-out-right');
+            }, 0);
+        } else if (direction === 'left') {
+            img.classList.add('fade-out-left');
+            setTimeout(() => {
+                img.src = src;
+                img.classList.remove('fade-out-left');
+            }, 0);
+        }
+    }
+
+    // 高亮显示点击的元素
+    function toggleHighlight(element) {
+        // 移除所有段落的高亮
+        document.querySelectorAll('.text-content p').forEach(p => p.classList.remove('clicked'));
+        // 高亮当前点击的段落
+        element.classList.toggle('clicked');
+    }
+
+
+    // 更换图片的函数（支持左右切换动画）
+    function changeImage(src, direction, imgId) {
+        var img = document.getElementById(imgId);
+
+        if (direction === 'right') {
+            img.classList.add('fade-out-right');
+            setTimeout(() => {
+                img.src = src;
+                img.classList.remove('fade-out-right');
+            }, 0);
+        } else if (direction === 'left') {
+            img.classList.add('fade-out-left');
+            setTimeout(() => {
+                img.src = src;
+                img.classList.remove('fade-out-left');
+            }, 0);
+        }
+    }
+
+    // 高亮显示点击的元素
+    function toggleHighlight(element) {
+        // 移除所有段落的高亮
+        document.querySelectorAll('.text-content p').forEach(p => p.classList.remove('clicked'));
+        // 高亮当前点击的段落
+        element.classList.toggle('clicked');
+    }
+
+    // 进度条功能
+    document.addEventListener('DOMContentLoaded', function () {
+        const progressBar = document.getElementById('progressBar');
+        const paragraphs = document.querySelectorAll('.text-content p');
+        const totalParagraphs = paragraphs.length;
+
+        // 设置进度条的最大值为段落数量减一
+        progressBar.max = totalParagraphs - 1;
+
+        // 点击段落时更新进度条
+        paragraphs.forEach((paragraph, index) => {
+            paragraph.addEventListener('click', () => {
+                progressBar.value = index; // 更新进度条的值
+                toggleHighlight(paragraph); // 高亮当前段落
+            });
+        });
+
+        // 拖拽或点击进度条时跳转到相应段落并触发点击事件
+        progressBar.addEventListener('input', () => {
+            const index = progressBar.value;
+            const targetParagraph = paragraphs[index];
+            if (targetParagraph) {
+                // 滚动到目标段落
+                targetParagraph.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+                // 手动触发目标段落的点击事件
+                targetParagraph.click(); // 这会调用 toggleHighlight 和 changeImage
+            }
+        });
+
+        // 键盘事件监听
+        document.addEventListener('keydown', (event) => {
+            const currentValue = parseInt(progressBar.value);
+            let newValue;
+
+            if (event.key === 'ArrowLeft') {
+                // 左键：减少进度条值
+                newValue = Math.max(currentValue - 1, 0);
+            } else if (event.key === 'ArrowRight') {
+                // 右键：增加进度条值
+                newValue = Math.min(currentValue + 1, totalParagraphs - 1);
+            } else {
+                return; // 如果不是左右键，直接返回
+            }
+
+            // 更新进度条的值
+            progressBar.value = newValue;
+
+            // 触发进度条的 input 事件
+            progressBar.dispatchEvent(new Event('input'));
+        });
+    });
+</script>
+
+
+</html>

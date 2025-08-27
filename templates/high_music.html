@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>乐理进阶</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+
+    body {
+        background-color: #000;
+        color: #ccc;
+        margin: 0;
+        padding: 0;
+    }
+
+    h1,
+    h2,
+    h3 {
+        color: #fff;
+    }
+
+    .sidebar {
+        position: fixed;
+        top: 56px;
+        left: 0;
+        height: calc(100vh - 56px);
+        width: 200px;
+        background-color: #000;
+        padding: 20px;
+        overflow-y: auto;
+        z-index: 1000; /* 确保导航栏在最上层 */
+    }
+
+    .sidebar ul {
+        list-style-type: none;
+        padding: 0;
+    }
+
+    .sidebar ul li {
+        margin-bottom: 10px;
+    }
+
+    .sidebar ul li a {
+        color: #fff;
+        text-decoration: none;
+    }
+
+    .main-content {
+        margin-left: 220px; /* 为侧边栏留出空间 */
+        padding: 20px;
+        padding-bottom: 80px; /* 为进度条留出空间 */
+    }
+
+    #tutorialImage {
+        width: 100%; /* 设置图片宽度为容器宽度 */
+        max-width: 100%; /* 确保图片适应容器 */
+        height: 400px; /* 根据需要可以设置固定高度 */
+        margin-bottom: 20px;
+        opacity: 1;
+        transition: opacity 1s ease-in-out;
+        position: sticky; /* 图片跟随视角滚动 */
+        top: 0; /* 确保图片始终在顶部 */
+        z-index: 1000; /* 提高z-index以覆盖其他元素 */
+    }
+
+    #tutorialVideo {
+        width: 100%; /* 设置图片宽度为容器宽度 */
+        max-width: 100%; /* 确保图片适应容器 */
+        height: 400px; /* 根据需要可以设置固定高度 */
+        margin-bottom: 20px; /* 给图片和文本之间添加间距 */
+        opacity: 1;
+        transition: opacity 1s ease-in-out;
+        position: sticky; /* 图片跟随视角滚动 */
+        top: 0; /* 确保图片始终在顶部 */
+        z-index: 1000; /* 提高z-index以覆盖其他元素 */
+    }
+
+    .text-content {
+        flex-grow: 1; /* 让文本内容占据剩余所有空间 */
+    }
+
+    h2 {
+        cursor: pointer;
+        background-color: #444;
+        padding: 10px;
+        border-radius: 5px;
+        color: white;
+    }
+
+    .text-content p {
+        position: relative;
+        padding-left: 20px; /* 留出显示小圆点的空间 */
+        margin-bottom: 10px; /* 段落间距 */
+        cursor: pointer;
+    }
+
+    /* 默认的小圆点样式 */
+    .text-content p::before {
+        content: '';
+        position: absolute;
+        left: 5px;
+        top: 10px; /* 根据字体大小调整使小圆点垂直居中 */
+        width: 8px;
+        height: 8px;
+        background-color: gray;
+        border-radius: 50%;
+    }
+
+    /* 进度条容器 */
+    .progress-container {
+        position: fixed;
+        bottom: 0;
+        left: 200px; /* 与侧边栏宽度一致 */
+        width: calc(100% - 200px); /* 减去侧边栏宽度 */
+        background-color: #333; /* 进度条背景色 */
+        padding: 10px;
+        z-index: 999; /* 确保进度条在导航栏下方 */
+    }
+
+    .progress-bar {
+        width: 100%;
+    }
+
+    /* 点击后的样式 */
+    .text-content p.clicked {
+        background-color: white; /* 改变为你想要的亮色 */
+        color: black;
+    }
+
+    .text-content p.clicked::before {
+        background-color: #4CAF50; /* 改变为你想要的亮色 */
+    }
+</style>
+
+</head>
+
+<body>
+    <!-- 导航栏 -->
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="{{ url_for('main') }}">
+                    <div class="logo">音艺智创 Metaverse Music Education</div>
+                </a>
+
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('overview') }}">概览</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('news') }}">新闻</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('forum') }}">论坛</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('learn') }}">学习</a></li>
+                        <li class="nav-item">
+                            <a class="nav-link" onclick="openPopup()" >钢琴</a>
+                        </li>
+                    </ul>
+
+                    <!-- 登录/用户名显示 -->
+                    <div class="d-flex">
+                        {% if session.get('username') %}
+                        <div class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                {{ session.get('username') }}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                                <li><a class="dropdown-item" href="{{ url_for('user_setting') }}">设置</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{{ url_for('logout') }}">退出</a></li>
+                            </ul>
+                        </div>
+                        {% else %}
+                        <a class="btn btn-outline-light" href="/login" role="button">登录</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="sidebar">
+        <ul>
+            <li><a href="#" onclick="scrollToAndDisplay('learn_big_scale')">认识大调音阶</a></li>
+            <li><a href="#" onclick="scrollToAndDisplay('learn_small_scale')">认识小调音阶</a></li>
+            <li><a href="#" onclick="scrollToAndDisplay('learn_degree')">认识音阶度数</a></li>
+            <li><a href ="#" onclick="scrollToAndDisplay('learn_key')">认识调号</a></li>
+            <li><a href="#" onclick="scrollToAndDisplay('learn_calculate')">计算调号</a></li>
+            <li><a href="#" onclick="scrollToAndDisplay('learn_space')">基本音程</a></li>
+            <li><a href="#" onclick="scrollToAndDisplay('learn_spspace')">特殊音程</a></li>
+        </ul>
+    </div>
+
+    <main class="main-content">
+        <div class="text-content" id="text-container">
+            <div class="progress-container">
+        <input type="range" id="progressBar" min="0" max="100" value="0" class="progress-bar">
+    </div>
+        <!-- 图片展示区域 -->
+        <img id="tutorialImage" src="/static/low_1.png" alt="教程相关图片">
+        <video id="tutorialVideo" style="display:none;" width="300" height="200">
+                <source src="/static/high_1.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        <video id="tutorialVideo" style="display:none;" width="300" height="200">
+                <source src="/static/high_2.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        <video id="tutorialVideo" style="display:none;" width="300" height="200">
+                <source src="/static/high_3.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+        </video>
+            <video id="tutorialVideo" style="display:none;" width="300" height="200">
+                <source src="/static/high_4.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+        </video>
+            <video id="tutorialVideo" style="display:none;" width="300" height="200">
+                <source src="/static/high_5.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+        </video>
+            <video id="tutorialVideo" style="display:none;" width="300" height="200">
+                <source src="/static/high_6.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+        </video>
+            <video id="tutorialVideo" style="display:none;" width="300" height="200">
+                <source src="/static/high_7.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+        </video>
+            <video id="tutorialVideo" style="display:none;" width="300" height="200">
+                <source src="/static/high_8.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+        </video>
+            <video id="tutorialVideo" style="display:none;" width="300" height="200">
+                <source src="/static/high_9.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+        </video>
+            <video id="tutorialVideo" style="display:none;" width="300" height="200">
+                <source src="/static/high_10.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+        </video>
+            <video id="tutorialVideo" style="display:none;" width="300" height="200">
+                <source src="/static/high_11.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+                </video>
+            <video id="tutorialVideo" style="display:none;" width="300" height="200">
+                <source src="/static/high_12.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+                </video>
+            <video id="tutorialVideo" style="display:none;" width="300" height="200">
+                <source src="/static/high_13.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+                </video>
+            <video id="tutorialVideo" style="display:none;" width="300" height="200">
+                <source src="/static/high_14.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+                </video>
+            <video id="tutorialVideo" style="display:none;" width="300" height="200">
+                <source src="/static/high_15.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+                </video>
+            <video id="tutorialVideo" style="display:none;" width="300" height="200">
+                <source src="/static/high_16.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+                </video>
+            <video id="tutorialVideo" style="display:none;" width="300" height="200">
+                <source src="/static/high_17.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+                </video>
+            <video id="tutorialVideo" style="display:none;" width="300" height="200">
+                <source src="/static/high_18.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+                </video>
+            <video id="tutorialVideo" style="display:none;" width="300" height="200">
+                <source src="/static/high_19.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+                </video>
+            <video id="tutorialVideo" style="display:none;" width="300" height="200">
+                <source src="/static/high_20.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+                </video>
+            <video id="tutorialVideo" style="display:none;" width="300" height="200">
+                <source src="/static/high_21.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+                </video>
+            <video id="tutorialVideo" style="display:none;" width="300" height="200">
+                <source src="/static/high_22.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+                </video>
+            <video id="tutorialVideo" style="display:none;" width="300" height="200">
+                <source src="/static/high_23.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+                </video>
+            <video id="tutorialVideo" style="display:none;" width="300" height="200">
+                <source src="/static/high_24.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+                </video>
+            <video id="tutorialVideo" style="display:none;" width="300" height="200">
+                <source src="/static/high_25.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+                </video>
+            <video id="tutorialVideo" style="display:none;" width="300" height="200">
+                <source src="/static/high_26.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+                </video>
+            <video id="tutorialVideo" style="display:none;" width="300" height="200">
+                <source src="/static/high_27.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+                </video>
+            <video id="tutorialVideo" style="display:none;" width="300" height="200">
+                <source src="/static/high_28.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+                </video>
+            <video id="tutorialVideo" style="display:none;" width="300" height="200">
+                <source src="/static/high_29.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+                </video>
+            <video id="tutorialVideo" style="display:none;" width="300" height="200">
+                <source src="/static/high_30.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+                </video>
+            <video id="tutorialVideo" style="display:none;" width="300" height="200">
+                <source src="/static/high_31.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+                </video>
+            <video id="tutorialVideo" style="display:none;" width="300" height="200">
+                <source src="/static/high_32.mp4" type="video/mp4">
+
+                Your browser does not support the video tag.
+                </video>
+            <video id="tutorialVideo" style="display:none;" width="300" height="200">
+                <source src="/static/high_33.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+                </video>
+        <!-- 文字按钮区域 -->
+
+            <h2 id="learn_big_scale">一、认识大调音阶</h2>
+             <div class="text-content" id="text-container">
+    <p  onclick="changeImage('/static/high_1.png'); toggleHighlight(this)">音阶是在一个八度音程内选取的若干音符。我们首先要讨论的是大调音阶。</p>
+    <p  onclick="changeImage('/static/high_2.png'); toggleHighlight(this)">大调音阶是依据特定公式构建的，其中 “W” 代表全音，“h” 代表半音。</p>
+    <p onclick="changeImage('/static/high_3.png'); toggleHighlight(this)">让我们来构建一个 C 大调音阶，起始音为 C。</p>
+    <p  onclick="changeImage('/static/high_4.png'); toggleHighlight(this)">从 C 开始，经过一个全音到达 D。</p>
+            <p onclick="changeImage('/static/high_5.png'); toggleHighlight(this)">从 D 出发，再经过一个全音到达 E。</p>
+            <p onclick="changeImage('/static/high_6.png'); toggleHighlight(this)">接着，向上移动半音到达 F。</p>
+            <p onclick="changeImage('/static/high_7.png'); toggleHighlight(this)">从 F 开始，经过一个全音到达 G。</p>
+            <p onclick="changeImage('/static/high_8.png'); toggleHighlight(this)">随后，再经过一个全音到达 A。</p>
+            <p onclick="changeImage('/static/high_9.png'); toggleHighlight(this)">然后，经过一个全音到达 B。</p>
+            <p onclick="changeImage('/static/high_10.png'); toggleHighlight(this)">最后，移动半音回到 C。</p>
+            <p id="triggerElement" onclick="playVideo('/static/high_1.mp4'); toggleHighlight(this)" >C 大调音阶由 C、D、E、F、G、A、B、C 组成。</p>
+            <p onclick="changeImage('/static/high_11.png'); toggleHighlight(this)">接下来，我们构建降 E 大调音阶，起始音为降 E（Eb）。</p>
+            <p onclick="changeImage('/static/high_12.png'); toggleHighlight(this)">第一步，从降 E 到 F。</p>
+            <p onclick="changeImage('/static/high_13.png'); toggleHighlight(this)">第二步，经过一个全音，从 F 到 G。</p>
+            <p onclick="changeImage('/static/high_14.png'); toggleHighlight(this)">请注意，从 G 开始，经过一个半音，到达的是降 A（Ab），而非 A。</p>
+            <p onclick="changeImage('/static/high_15.png'); toggleHighlight(this)">从降 A 开始，经过一个全音，到达降 B（Bb）。</p>
+            <p onclick="changeImage('/static/high_16.png'); toggleHighlight(this)">接着，再经过一步到达 C。</p>
+            <p onclick="changeImage('/static/high_17.png'); toggleHighlight(this)">然后，再经过一步到达 D。</p>
+            <p onclick="changeImage('/static/high_18.png'); toggleHighlight(this)">最后，从 D 开始，经过一个半音，回到降 E。</p>
+            <p id="triggerElement" onclick="playVideo('/static/high_2.mp4'); toggleHighlight(this)" >降 E 大调音阶由降 E、F、G、降 A、降 B、C、D、降 E 组成。</p>
+            <p onclick="changeImage('/static/high_19.png'); toggleHighlight(this)">请注意，降 E 大调中有三个降号（两个降 E 只算一次）。</p>
+            <p onclick="changeImage('/static/high_20.png'); toggleHighlight(this)">最后，我们将构建 D 大调音阶。</p>
+            <p onclick="changeImage('/static/high_21.png'); toggleHighlight(this)">第一步，从 D 到 E。</p>
+            <p onclick="changeImage('/static/high_22.png'); toggleHighlight(this)">从 E 开始，经过一个全音，我们到达升 F（F#）。</p>
+            <p onclick="changeImage('/static/high_23.png'); toggleHighlight(this)">再经过一个半音，我们到达 G。</p>
+            <p onclick="changeImage('/static/high_24.png'); toggleHighlight(this)">接着，经过一个全音，我们到达 A。</p>
+            <p onclick="changeImage('/static/high_25.png'); toggleHighlight(this)">从 A 出发，经过一个全音，我们到达 B。</p>
+            <p onclick="changeImage('/static/high_26.png'); toggleHighlight(this)">从 B 开始，经过一个全音，我们到达升 C（C#）。</p>
+            <p onclick="changeImage('/static/high_27.png'); toggleHighlight(this)">最后，经过一个半音，我们回到 D。</p>
+            <p id="triggerElement" onclick="playVideo('/static/high_3.mp4'); toggleHighlight(this)" >D 大调音阶由 D、E、升 F、G、A、B、升 C、D 组成。</p>
+            <p onclick="changeImage('/static/high_28.png'); toggleHighlight(this)">请注意，D 大调中有两个升号。</p>
+            <p onclick="changeImage('/static/high_29.png'); toggleHighlight(this)">只要从第一个音符开始，按照相应公式，就可以构建出任何大调音阶。</p>
+            <h2 id="learn_small_scale">二、认识小调音阶</h2>
+            <p onclick="changeImage('/static/high_30.png');toggleHighlight(this)">大调音阶只有一种形式，但小调音阶有三种不同类型。</p>
+            <p onclick="changeImage('/static/high_31.png');toggleHighlight(this)">我们首先要讨论的是自然小调音阶，它依据特定公式构建。</p>
+            <p onclick="changeImage('/static/high_32.png');toggleHighlight(this)">让我们构建一个 A 自然小调音阶，起始音为 A。</p>
+            <p onclick="changeImage('/static/high_33.png');toggleHighlight(this)">从 A 开始，经过一个全音到达 B。</p>
+            <p onclick="changeImage('/static/high_34.png');toggleHighlight(this)">接着，经过一个半音到达 C。</p>
+            <p onclick="changeImage('/static/high_35.png');toggleHighlight(this)">从 C 出发，经过一个全音到达 D。</p>
+            <p onclick="changeImage('/static/high_36.png');toggleHighlight(this)">再经过一个全音到达 E。</p>
+            <p onclick="changeImage('/static/high_37.png');toggleHighlight(this)">从 E 开始，向上经过一个半音到达 F。</p>
+            <p onclick="changeImage('/static/high_38.png');toggleHighlight(this)">从 F 出发，经过一个全音到达 G。</p>
+            <p onclick="changeImage('/static/high_39.png');toggleHighlight(this)">最后，经过一个全音回到 A。</p>
+            <p id="triggerElement" onclick="playVideo('/static/high_4.mp4'); toggleHighlight(this)" >A 自然小调音阶由 A、B、C、D、E、F、G、A 组成。</p>
+            <p onclick="changeImage('/static/high_40.png');toggleHighlight(this)">请注意，A 自然小调音阶中没有带临时记号的音符。</p>
+            <p onclick="changeImage('/static/high_41.png');toggleHighlight(this)">让我们构建一个升 G 自然小调音阶，起始音为升 G（G#）。</p>
+            <p onclick="changeImage('/static/high_42.png');toggleHighlight(this)">从升 G 开始，经过一个全音到达升 A（A#）。</p>
+            <p onclick="changeImage('/static/high_43.png');toggleHighlight(this)">接着，经过一个半音到达 B。</p>
+            <p onclick="changeImage('/static/high_44.png');toggleHighlight(this)">从 B 出发，经过一个全音到达升 C（C#）。</p>
+            <p onclick="changeImage('/static/high_45.png');toggleHighlight(this)">再经过一个全音到达升 D（D#）。</p>
+            <p onclick="changeImage('/static/high_46.png');toggleHighlight(this)">从升 D 开始，经过一个半音到达 E。</p>
+            <p onclick="changeImage('/static/high_47.png');toggleHighlight(this)">从 E 出发，经过一个全音到达升 F（F#）。</p>
+            <p onclick="changeImage('/static/high_48.png');toggleHighlight(this)">最后，经过一个全音回到升 G。</p>
+            <p id="triggerElement" onclick="playVideo('/static/high_5.mp4'); toggleHighlight(this)" >升 G 自然小调音阶由升 G、升 A、B、升 C、升 D、E、升 F、升 G 组成。</p>
+            <p onclick="changeImage('/static/high_49.png');toggleHighlight(this)">请注意，升 G 自然小调音阶有 5 个升号。</p>
+            <p onclick="changeImage('/static/high_50.png');toggleHighlight(this)">接下来，我们构建 C 自然小调音阶，起始音为 C。</p>
+            <p onclick="changeImage('/static/high_51.png');toggleHighlight(this)">经过一个全音，我们到达 D。</p>
+            <p onclick="changeImage('/static/high_52.png');toggleHighlight(this)">从D开始，经过一个半音，我们到达降E（Eb）。</p>
+            <p onclick="changeImage('/static/high_53.png');toggleHighlight(this)">接着，经过一个全音，我们到达F。</p>
+            <p onclick="changeImage('/static/high_54.png');toggleHighlight(this)">从F出发，经过一个全音，我们到达G。</p>
+            <p onclick="changeImage('/static/high_55.png');toggleHighlight(this)">从G开始，经过一个半音，我们到达降A（Ab）。</p>
+            <p onclick="changeImage('/static/high_56.png');toggleHighlight(this)">从降A开始，经过一个全音，我们到达降B（Bb）。</p>
+            <p onclick="changeImage('/static/high_57.png');toggleHighlight(this)">最后，经过一个全音，我们回到C。</p>
+            <p id="triggerElement" onclick="playVideo('/static/high_6.mp4'); toggleHighlight(this)" >C自然小调音阶由C、D、降E、F、G、降A、降B组成。</p>
+            <p onclick="changeImage('/static/high_58.png');toggleHighlight(this)">请注意，C自然小调音阶有三个降号。</p>
+            <p onclick="changeImage('/static/high_59.png');toggleHighlight(this)">接下来，我们讨论和声小调。</p>
+            <p onclick="changeImage('/static/high_60.png');toggleHighlight(this)">要将任何自然小调音阶转换为和声小调，需将第七级音升高半音。</p>
+            <p onclick="changeImage('/static/high_61.png');toggleHighlight(this)">让我们把C自然小调转换为C和声小调。</p>
+            <p onclick="changeImage('/static/high_62.png');toggleHighlight(this)">只需将第七级音降B（Bb）升高半音，得到B。</p>
+            <p id="triggerElement" onclick="playVideo('/static/high_7.mp4'); toggleHighlight(this)" >C 和声小调音阶为：C、D、降 E、F、G、降 A、B。</p>
+            <p onclick="changeImage('/static/high_63.png');toggleHighlight(this)">最后，我们来探讨旋律小调。</p>
+            <p onclick="changeImage('/static/high_64.png');toggleHighlight(this)">要将自然小调音阶转换为旋律小调，需把第六级音和第七级音都升高半音。</p>
+            <p onclick="changeImage('/static/high_65.png');toggleHighlight(this)">例如，要把 C 自然小调转换为 C 旋律小调，只需将降 A（Ab）和降 B（Bb）升高半音，变为 A 和 B。</p>
+            <p id="triggerElement" onclick="playVideo('/static/high_8.mp4'); toggleHighlight(this)" >C 旋律小调音阶为：C、D、降 E、F、G、A、B。</p>
+            <p onclick="changeImage('/static/high_66.png');toggleHighlight(this)">通常情况下，旋律小调仅在音阶上行时使用。</p>
+            <p id="triggerElement" onclick="playVideo('/static/high_9.mp4'); toggleHighlight(this)" >在音阶下行时，作曲家更倾向于采用自然小调音阶。</p>
+            <h2 id="learn_degree">三、认识音阶度数</h2>
+            <p onclick="changeImage('/static/high_67.png');toggleHighlight(this)">音阶中的每个音符都有一个特定名称，称为音阶度数。</p>
+            <p onclick="changeImage('/static/high_68.png');toggleHighlight(this)">第一个（也是最后一个）音符称为主音。</p>
+            <p onclick="changeImage('/static/high_69.png');toggleHighlight(this)">第五个音符称为属音（dominant）。</p>
+            <p onclick="changeImage('/static/high_70.png');toggleHighlight(this)">第四个音符称为下属音（subdominant）。</p>
+            <p onclick="changeImage('/static/high_71.png');toggleHighlight(this)">请注意，下属音到主音的音程距离，与主音到属音的音程距离相同（纯五度）。</p>
+            <p onclick="changeImage('/static/high_72.png');toggleHighlight(this)">前缀 “sub -” 在拉丁语中意为 “在…… 之下”。</p>
+            <p onclick="changeImage('/static/high_73.png');toggleHighlight(this)">第三个音符称为中音（median），因为它位于主音和属音的中间。</p>
+            <p onclick="changeImage('/static/high_74.png');toggleHighlight(this)">同样，第六个音符称为下中音，因为它位于上主音和下属音的中间。</p>
+            <p onclick="changeImage('/static/high_75.png');toggleHighlight(this)">第二个音符称为上主音（supersonic），“super -” 在拉丁语中意为 “在…… 之上”。</p>
+            <p onclick="changeImage('/static/high_76.png');toggleHighlight(this)">虽然大调和小调音阶的前六个音符的音阶度数相同，但第七个音符较为特殊。</p>
+            <p onclick="changeImage('/static/high_77.png');toggleHighlight(this)">如果第七级音比主音低半音，它就称为下主音。</p>
+            <p id="triggerElement" onclick="playVideo('/static/high_10.mp4'); toggleHighlight(this)" >弹奏 C 大调音阶时，留意第七级音是如何解决到主音的。</p>
+            <p onclick="changeImage('/static/high_78.png');toggleHighlight(this)">下主音也出现在和声小调和旋律小调中。</p>
+            <p onclick="changeImage('/static/high_79.png');toggleHighlight(this)">在自然小调中，第七级音比主音低一个全音，这个音被称为下主音（subsonic）。</p>
+            <p id="triggerElement" onclick="playVideo('/static/high_11.mp4'); toggleHighlight(this)" >弹奏 C 自然小调音阶时，留意第七级音并没有向主音倾向的趋势。</p>
+            <p onclick="changeImage('/static/high_80.png');toggleHighlight(this)">也可用带有上标或下标等变音符号的数字来表示音阶度数。</p>
+            <p onclick="changeImage('/static/high_81.png');toggleHighlight(this)">例如，音阶中的属音（如上述例子中的 G），可能会标记为带有变音符号的 5。</p>
+            <h2 id="learn_key">四、认识调号</h2>
+            <p onclick="changeImage('/static/high_82.png');toggleHighlight(this)">调号是音阶中所有临时记号的集合。</p>
+            <p onclick="changeImage('/static/high_83.png');toggleHighlight(this)">为说明这一点，我们以 C 小调为例，它有三个降号。</p>
+            <p onclick="changeImage('/static/high_84.png');toggleHighlight(this)">与其在每个 E、A 和 B 旁边都写一个降号，不如在小节开头添加一个调号。</p>
+            <p onclick="changeImage('/static/high_85.png');toggleHighlight(this)">接下来，看一下降 D 大调（Db Major），它有五个降号。</p>
+            <p onclick="changeImage('/static/high_86.png');toggleHighlight(this)">同样，我们使用调号，而不是逐个书写临时记号。</p>
+            <p onclick="changeImage('/static/high_87.png');toggleHighlight(this)">你可能已经注意到，这些降号是按特定顺序排列的。</p>
+            <p onclick="changeImage('/static/high_88.png');toggleHighlight(this)">首先是降 B（Bb），然后是降 E（Eb）、降 A（Ab）、降 D（Db）和降 G（Gb）。</p>
+            <p onclick="changeImage('/static/high_89.png');toggleHighlight(this)">接着是降 C（Cb），最后是降 F（Fb）。</p>
+            <p onclick="changeImage('/static/high_90.png');toggleHighlight(this)">你可以用这句谚语来记住这个顺序：“Battle Ends And Down Goes Charles' Father”。</p>
+            <p onclick="changeImage('/static/high_91.png');toggleHighlight(this)">调号也可以包含升号。</p>
+            <p onclick="changeImage('/static/high_92.png');toggleHighlight(this)">以 A 大调为例，它有三个升号。</p>
+            <p onclick="changeImage('/static/high_93.png');toggleHighlight(this)">升 C（C#）、升 F（F#）和升 G（G#）出现在其调号中。</p>
+            <p onclick="changeImage('/static/high_94.png');toggleHighlight(this)">最后，我们来看 E 大调，它有四个升号，</p>
+            <p onclick="changeImage('/static/high_95.png');toggleHighlight(this)">分别是升 F（F#）、升 G（G#）、升 C（C#）和升 D（D#），这些音都出现在调号中。</p>
+            <p onclick="changeImage('/static/high_96.png');toggleHighlight(this)">升号的排列顺序与降号相反。</p>
+            <p onclick="changeImage('/static/high_97.png');toggleHighlight(this)">升 F 排在第一位，接着是升 C、升 G 和升 D。</p>
+            <p onclick="changeImage('/static/high_98.png');toggleHighlight(this)">随后是升 A、升 E，最后是升 B。</p>
+            <p onclick="changeImage('/static/high_99.png');toggleHighlight(this)">你可以用这句谚语来记住这个顺序：“Father Charles Goes Down And Ends Battle”。</p>
+            <p onclick="changeImage('/static/high_100.png');toggleHighlight(this)">可使用此图表来查看高音谱号和低音谱号的调号。</p>
+            <h2 id="learn_calculate">五、计算调号</h2>
+            <p onclick="changeImage('/static/high_101.png');toggleHighlight(this)">共有 30 种不同的调号（15 种用于大调音阶，15 种用于小调音阶），大多数音乐理论学习者需要记住全部 30 个。</p>
+            <p onclick="changeImage('/static/high_102.png');toggleHighlight(this)">幸运的是，借助调号计算法，只需记住 7 个即可。</p>
+            <p onclick="changeImage('/static/high_103.png');toggleHighlight(this)">在这种计算方法中，每个调号都依据临时记号的数量和类型被赋予一个数值。升号（Sharp）为正数，降号为负数。</p>
+            <p onclick="changeImage('/static/high_104.png');toggleHighlight(this)">C 大调没有临时记号，其数值为 0。</p>
+            <p onclick="changeImage('/static/high_105.png');toggleHighlight(this)">D 大调有两个升号，数值为 2。</p>
+            <p onclick="changeImage('/static/high_106.png');toggleHighlight(this)">E 大调有四个升号，数值为 4。</p>
+            <p onclick="changeImage('/static/high_107.png');toggleHighlight(this)">F 大调有一个降号，数值为 -1（请记住：降号被赋予负数）。</p>
+            <p onclick="changeImage('/static/high_108.png');toggleHighlight(this)">G 大调有一个升号，数值为 1。</p>
+            <p onclick="changeImage('/static/high_109.png');toggleHighlight(this)">A 大调有三个升号，数值为 3。</p>
+            <p onclick="changeImage('/static/high_110.png');toggleHighlight(this)">最后，B 大调有五个升号，数值为 5。 </p>
+            <p onclick="changeImage('/static/high_111.png');toggleHighlight(this)">在继续学习之前，务必记住这七个数值。</p>
+            <p onclick="changeImage('/static/high_112.png');toggleHighlight(this)">接下来，我们比较一下降 C 大调（Cb Major）、C 大调和升 C 大调（C# Major）。</p>
+            <p onclick="changeImage('/static/high_113.png');toggleHighlight(this)">如果从 C 大调开始，其调号数值减去 7，最终会得到降 C 大调。</p>
+            <p onclick="changeImage('/static/high_114.png');toggleHighlight(this)">如果从 C 大调开始，其调号数值加上 7，最终会得到升 C 大调。</p>
+            <p onclick="changeImage('/static/high_115.png');toggleHighlight(this)">这两个数字关系有助于我们计算未知的调号。</p>
+            <p onclick="changeImage('/static/high_116.png');toggleHighlight(this)">我们来推算一下降 E 大调（Eb Major）。首先，E 大调的调号数值为 4。</p>
+            <p onclick="changeImage('/static/high_117.png');toggleHighlight(this)">要转换为降 E 大调，将 E 大调的调号数值减去 7。</p>
+            <p onclick="changeImage('/static/high_118.png');toggleHighlight(this)">结果是 -3，所以降 E 大调有 3 个降号。</p>
+            <p onclick="changeImage('/static/high_119.png');toggleHighlight(this)">我们再试试升 F 大调（F# Major）。从 F 大调开始，其调号数值为 -1。</p>
+            <p onclick="changeImage('/static/high_120.png');toggleHighlight(this)">要转换为升 F 大调，将 F 大调的调号数值加上 7。</p>
+            <p onclick="changeImage('/static/high_121.png');toggleHighlight(this)">结果是 6，所以升 F 大调有 6 个升号。</p>
+            <p onclick="changeImage('/static/high_122.png');toggleHighlight(this)">接下来，我们研究小调音阶，以 C 大调与 C 小调为例进行比较。</p>
+            <p onclick="changeImage('/static/high_123.png');toggleHighlight(this)">要将大调音阶转换为其平行小调音阶，只需将大调调号数值减去 3。</p>
+            <p onclick="changeImage('/static/high_124.png');toggleHighlight(this)">我们来计算 D 小调的调号。从 D 大调开始，其调号数值为 2。</p>
+            <p onclick="changeImage('/static/high_125.png');toggleHighlight(this)">接着，减去 3。</p>
+            <p onclick="changeImage('/static/high_126.png');toggleHighlight(this)">结果为 -1，所以 D 小调有 1 个降号。</p>
+            <p onclick="changeImage('/static/high_127.png');toggleHighlight(this)">然后，我们尝试计算 F 小调。从 F 大调开始，其调号数值为 -1。</p>
+            <p onclick="changeImage('/static/high_128.png');toggleHighlight(this)">接着，减去 3。</p>
+            <p onclick="changeImage('/static/high_129.png');toggleHighlight(this)">结果为 -4，所以 F 小调有 4 个降号。</p>
+            <p onclick="changeImage('/static/high_130.png');toggleHighlight(this)">有些调号的计算需要两次转换。比如，计算升 C 小调（C# Minor）。</p>
+            <p onclick="changeImage('/static/high_131.png');toggleHighlight(this)">从 C 大调开始，其调号数值为 0。</p>
+            <p onclick="changeImage('/static/high_132.png');toggleHighlight(this)">接着，加上 7 得到升 C 大调（C# Major）。</p>
+            <p onclick="changeImage('/static/high_133.png');toggleHighlight(this)">最后，减去 3 转换为升 C 小调。</p>
+            <p onclick="changeImage('/static/high_134.png');toggleHighlight(this)">结果为 4，所以升 C 小调（C# Minor）有 4 个升号。</p>
+            <p onclick="changeImage('/static/high_135.png');toggleHighlight(this)">使用这种计算方法，可以算出具有 7 个以上临时记号的调号。</p>
+            <p onclick="changeImage('/static/high_136.png');toggleHighlight(this)">虽然这些调号在理论上是存在的，但在实际应用中并不会被使用。</p>
+            <p onclick="changeImage('/static/high_137.png');toggleHighlight(this)">例如，我们来计算升 G 大调（G# Major）。</p>
+            <p onclick="changeImage('/static/high_138.png');toggleHighlight(this)">从 G 大调开始，其调号数值为 1。</p>
+            <p onclick="changeImage('/static/high_139.png');toggleHighlight(this)">接着，加上 7 得到升 G 大调。</p>
+            <p onclick="changeImage('/static/high_140.png');toggleHighlight(this)">结果为 8，所以升 G 大调有 8 个升号，即 1 个双升号和 6 个普通升号。</p>
+            <p onclick="changeImage('/static/high_141.png');toggleHighlight(this)">同样，这个调号仅存在于理论层面。在实际创作中，作曲家会使用与升 G 大调等音的降 A 大调（Ab major）。</p>
+            <p onclick="changeImage('/static/high_142.png');toggleHighlight(this)">可将此图表作为调号计算方法的参考。</p>
+            <h2 id="learn_space">六、基本音程</h2>
+            <p onclick="changeImage('/static/high_143.png');toggleHighlight(this)">音程用于衡量两个音符之间的距离。</p>
+            <p onclick="changeImage('/static/high_144.png');toggleHighlight(this)">我们首先讨论基本音程，这些音程是在五线谱上进行测量的。</p>
+            <p onclick="changeImage('/static/high_145.png');toggleHighlight(this)">当两个音符处于五线谱的同一行或同一间时，它们构成的音程为一度（或纯一度）。</p>
+            <p onclick="changeImage('/static/high_146.png');toggleHighlight(this)">C 到 C 就是一度的例子。</p>
+            <p onclick="changeImage('/static/high_147.png');toggleHighlight(this)">D 到 D 以及 E 到 E 也都是一度。</p>
+            <p onclick="changeImage('/static/high_148.png');toggleHighlight(this)">在测量基本音程时，临时记号会被忽略，只有五线谱上的位置是重要的。</p>
+            <p onclick="changeImage('/static/high_149.png');toggleHighlight(this)">比如 C - 升 C、D - 降 D 和升 A - 降 A 仍然是一度。</p>
+            <p onclick="changeImage('/static/high_150.png');toggleHighlight(this)">随着五线谱上音符间的距离增大，音程类型也会相应增加。</p>
+            <p onclick="changeImage('/static/high_151.png');toggleHighlight(this)">C - D、D - E 和 E - F 都是二度。</p>
+            <p onclick="changeImage('/static/high_152.png');toggleHighlight(this)">C - E、D - F 和 E - G 都是三度。</p>
+            <p onclick="changeImage('/static/high_153.png');toggleHighlight(this)">请注意，三度音程中的两个音符在五线谱上的位置类型是相同的，要么都在同一行，要么都在同一间。</p>
+            <p onclick="changeImage('/static/high_154.png');toggleHighlight(this)">C - F、D - G 和 E - A 都是四度音程。</p>
+            <p onclick="changeImage('/static/high_155.png');toggleHighlight(this)">C - G、D - A 和 E - B 都是五度音程。</p>
+            <p onclick="changeImage('/static/high_156.png');toggleHighlight(this)">C - A、D - B 和 E - C 都是六度音程。</p>
+            <p onclick="changeImage('/static/high_157.png');toggleHighlight(this)">C - B、D - C 和 E - D 都是七度音程。</p>
+            <p onclick="changeImage('/static/high_158.png');toggleHighlight(this)">C - C、D - D 和 E - E 都是八度音程。</p>
+            <p onclick="changeImage('/static/high_159.png');toggleHighlight(this)">可使用此图表来查询基本音程。</p>
+            <h2 id="learn_spspace">七、特殊音程</h2>
+            <p onclick="changeImage('/static/high_160.png');toggleHighlight(this)">特定音程在五线谱和键盘上以半音为单位进行测量。</p>
+            <p onclick="changeImage('/static/high_161.png');toggleHighlight(this)">正如你在上一章学到的，C 到 D 和 C 到降 D（Db）都是二度音程。但具体而言，C 到 D 比 C 到降 D 大一个半音。</p>
+            <p onclick="changeImage('/static/high_162.png');toggleHighlight(this)">我们来学习几种特定音程。</p>
+            <p onclick="changeImage('/static/high_163.png');toggleHighlight(this)">大二度由两个半音组成。</p>
+            <p id="triggerElement" onclick="playVideo('/static/high_12.mp4'); toggleHighlight(this)" >C 到 D 是大二度，因为在五线谱上它是二度音程，在键盘上是两个半音的距离。</p>
+            <p id="triggerElement" onclick="playVideo('/static/high_13.mp4'); toggleHighlight(this)" >E 到升 F（F#）是大二度的另一个例子。</p>
+            <p onclick="changeImage('/static/high_164.png');toggleHighlight(this)">大三度由四个半音组成。</p>
+            <p id="triggerElement" onclick="playVideo('/static/high_14.mp4'); toggleHighlight(this)" >C 到 E 是大三度。</p>
+            <p id="triggerElement" onclick="playVideo('/static/high_15.mp4'); toggleHighlight(this)" >E 到升 G（G#）也是大三度。</p>
+            <p onclick="changeImage('/static/high_164.png');toggleHighlight(this)">纯四度由五个半音组成。</p>
+            <p id="triggerElement" onclick="playVideo('/static/high_16.mp4'); toggleHighlight(this)" >C 到 F 是纯四度。</p>
+            <p id="triggerElement" onclick="playVideo('/static/high_17.mp4'); toggleHighlight(this)" >F 到降 B（Bb）也是纯四度。</p>
+            <p onclick="changeImage('/static/high_164.png');toggleHighlight(this)">纯五度由七个半音组成。</p>
+            <p id="triggerElement" onclick="playVideo('/static/high_18.mp4'); toggleHighlight(this)" >C 到 G 是纯五度。</p>
+            <p id="triggerElement" onclick="playVideo('/static/high_19.mp4'); toggleHighlight(this)" >B 到升 F（F#）也是纯五度。</p>
+            <p onclick="changeImage('/static/high_164.png');toggleHighlight(this)">大六度由九个半音组成。</p>
+            <p id="triggerElement" onclick="playVideo('/static/high_20.mp4'); toggleHighlight(this)" >C 到 A 是大六度。</p>
+            <p id="triggerElement" onclick="playVideo('/static/high_21.mp4'); toggleHighlight(this)" >降 E（Eb）到 C 也是大六度。</p>
+            <p onclick="changeImage('/static/high_164.png');toggleHighlight(this)">大七度由 11 个半音组成。</p>
+            <p id="triggerElement" onclick="playVideo('/static/high_22.mp4'); toggleHighlight(this)" >C 到 B 是大七度。</p>
+            <p id="triggerElement" onclick="playVideo('/static/high_23.mp4'); toggleHighlight(this)" >D 到升 C（C#）也是大七度。</p>
+            <p onclick="changeImage('/static/high_164.png');toggleHighlight(this)">最后，纯八度（或完美八度）由 12 个半音组成。</p>
+            <p id="triggerElement" onclick="playVideo('/static/high_24.mp4'); toggleHighlight(this)" >C 到 C 是纯八度。</p>
+            <p onclick="changeImage('/static/high_164.png');toggleHighlight(this)">术语 “major”（大）和 “perfect”（纯）指的是音程的性质。</p>
+            <p onclick="changeImage('/static/high_164.png');toggleHighlight(this)">只有二度、三度、六度和七度可以是大音程。一度、四度、五度和八度用 “纯” 来描述。</p>
+            <p onclick="changeImage('/static/high_164.png');toggleHighlight(this)">接下来，我们讨论一下小音程。</p>
+            <p onclick="changeImage('/static/high_165.png');toggleHighlight(this)">小音程比大音程少一个半音。</p>
+            <p id="triggerElement" onclick="playVideo('/static/high_25.mp4'); toggleHighlight(this)" >例如，因为 C 到 E 是大三度（4 个半音），所以 C 到降 E（Eb）是小三度（3 个半音）。</p>
+            <p id="triggerElement" onclick="playVideo('/static/high_26.mp4'); toggleHighlight(this)" >E 到 G 也是小三度（因为 E 到升 G（G#）是大三度）。</p>
+            <p onclick="changeImage('/static/high_164.png');toggleHighlight(this)">由于小音程是由大音程变化而来，只有二度、三度、六度和七度可以是 “小” 音程。</p>
+            <p onclick="changeImage('/static/high_166.png');toggleHighlight(this)">增音程比纯音程多一个半音。</p>
+            <p id="triggerElement" onclick="playVideo('/static/high_27.mp4'); toggleHighlight(this)" >因为 C 到 F 是纯四度（5 个半音），所以 C 到升 F（F#）是增四度（6 个半音）。</p>
+            <p id="triggerElement" onclick="playVideo('/static/high_28.mp4'); toggleHighlight(this)" >F 到 B 也是增四度（因为 F 到降 B（Bb）是纯四度）。</p>
+            <p onclick="changeImage('/static/high_167.png');toggleHighlight(this)">可以通过增加一个半音来得到增音程。</p>
+            <p id="triggerElement" onclick="playVideo('/static/high_29.mp4'); toggleHighlight(this)" >例如，因为 C 到 A 是大六度（9 个半音），所以 C 到升 A（A#）是增六度（10 个半音）。</p>
+            <p id="triggerElement" onclick="playVideo('/static/high_30.mp4'); toggleHighlight(this)" >降 D（Db）到 B 也是增六度（因为降 D 到降 B（Bb）是大六度）。</p>
+            <p onclick="changeImage('/static/high_168.png');toggleHighlight(this)">减音程比纯音程少一个半音。</p>
+            <p id="triggerElement" onclick="playVideo('/static/high_31.mp4'); toggleHighlight(this)" >因为 C 到 G 是纯五度（7 个半音），所以 C 到降 G（Gb）将是减五度（6 个半音）。</p>
+            <p id="triggerElement" onclick="playVideo('/static/high_32.mp4'); toggleHighlight(this)" >B 到 F 也是减五度（因为 B 到升 F（F#）是纯五度）。</p>
+            <p onclick="changeImage('/static/high_169.png');toggleHighlight(this)">小音程也可以通过减少一个半音来得到减音程。</p>
+            <p onclick="changeImage('/static/high_164.png');toggleHighlight(this)">回想一下，C 到 B 是大七度（11 个半音），C 到降 B（Bb）是小七度（10 个半音）。</p>
+            <p id="triggerElement" onclick="playVideo('/static/high_33.mp4'); toggleHighlight(this)" >C 到重降 B（Bbb）是减七度（9 个半音）。</p>
+            <p onclick="changeImage('/static/high_170.png');toggleHighlight(this)">此图表展示了不同音程性质之间的关系。</p>
+            <p onclick="changeImage('/static/high_171.png');toggleHighlight(this)">此图表还展示了每个特定音程所包含的半音数量。</p>
+        </div>
+        </div>
+    </main>
+</body>
+
+<script>
+    // 更换图片的函数（直接切换图片）
+    function changeImage(src) {
+        var img = document.getElementById('tutorialImage');
+        img.src = src; // 直接设置图片的src属性
+    }
+
+    // 高亮显示点击的元素
+    function toggleHighlight(element) {
+        // 移除所有段落的高亮
+        document.querySelectorAll('.text-content p').forEach(p => p.classList.remove('clicked'));
+        // 高亮当前点击的段落
+        element.classList.toggle('clicked');
+    }
+
+    // 打开弹出窗口
+    function openPopup() {
+        window.open('https://www.musictheory.net/piano', 'popupWindow', 'width=800px,height=300px');
+    }
+
+    // 播放视频
+    function playVideo(src) {
+        var videoElement = document.getElementById('tutorialVideo');
+        var imgElement = document.getElementById('tutorialImage');
+        videoElement.src = src;
+        videoElement.style.display = 'block';
+        imgElement.style.display = 'none';
+        videoElement.play();
+        videoElement.addEventListener('ended', function () {
+            // 当视频播放结束时，隐藏视频元素并重新显示图片
+            videoElement.style.display = 'none';
+            imgElement.style.display = 'block';
+        }, false);
+    }
+
+    // 滚动到指定部分并显示
+    function scrollToAndDisplay(sectionId) {
+        event.preventDefault(); // 防止默认行为
+        var targetSection = document.getElementById(sectionId);
+        if (!targetSection) return; // 如果找不到目标部分，直接返回
+
+        // 显示目标部分
+        targetSection.style.display = 'block';
+
+        // 计算目标标题相对于视口顶部的目标位置
+        var fixedOffsetFromTop = 400;
+        var targetPosition = targetSection.getBoundingClientRect().top + window.scrollY - fixedOffsetFromTop;
+
+        // 平滑滚动到指定位置
+        window.scrollTo({
+            top: targetPosition,
+            behavior: 'smooth'
+        });
+    }
+
+    // 进度条功能
+    document.addEventListener('DOMContentLoaded', function () {
+        const progressBar = document.getElementById('progressBar');
+        const paragraphs = document.querySelectorAll('.text-content p');
+        const totalParagraphs = paragraphs.length;
+
+        // 设置进度条的最大值为段落数量减一
+        progressBar.max = totalParagraphs - 1;
+
+        // 点击段落时更新进度条
+        paragraphs.forEach((paragraph, index) => {
+            paragraph.addEventListener('click', () => {
+                progressBar.value = index; // 更新进度条的值
+                toggleHighlight(paragraph); // 高亮当前段落
+            });
+        });
+
+        // 拖拽或点击进度条时跳转到相应段落并触发点击事件
+        progressBar.addEventListener('input', () => {
+            const index = progressBar.value;
+            const targetParagraph = paragraphs[index];
+            if (targetParagraph) {
+                // 滚动到目标段落
+                targetParagraph.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+                // 手动触发目标段落的点击事件
+                targetParagraph.click(); // 这会调用 toggleHighlight 和 changeImage
+            }
+        });
+
+        // 键盘事件监听
+        document.addEventListener('keydown', (event) => {
+            const currentValue = parseInt(progressBar.value);
+            let newValue;
+
+            if (event.key === 'ArrowLeft') {
+                // 左键：减少进度条值
+                newValue = Math.max(currentValue - 1, 0);
+                event.preventDefault(); // 阻止默认行为
+            } else if (event.key === 'ArrowRight') {
+                // 右键：增加进度条值
+                newValue = Math.min(currentValue + 1, totalParagraphs - 1);
+                event.preventDefault(); // 阻止默认行为
+            } else {
+                return; // 如果不是左右键，直接返回
+            }
+
+            // 更新进度条的值
+            progressBar.value = newValue;
+
+            // 触发进度条的 input 事件
+            progressBar.dispatchEvent(new Event('input'));
+        });
+    });
+</script>
+
+
+</html>

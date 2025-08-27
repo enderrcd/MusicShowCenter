@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>音艺智创</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../static/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"></script>
+    <style>
+        /* 初始页面样式 */
+        .initial-page {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #000; /* 背景为黑色 */
+            z-index: 1000; /* 确保在最上层 */
+            transition: opacity 1s ease-out; /* 淡出效果 */
+        }
+
+        .initial-page img {
+            width: 350px; /* 图片尺寸 */
+            height: 350px;
+            border-radius: 50%; /* 圆形 */
+            animation: float 3s ease-in-out infinite; /* 浮动效果 */
+        }
+
+        /* 浮动动画 */
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        /* 主页内容初始隐藏 */
+        main {
+            opacity: 0;
+            transition: opacity 1s ease-in; /* 淡入效果 */
+        }
+
+        /* 显示主页内容 */
+        main.visible {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <!-- 初始页面 -->
+    <div class="initial-page" id="initialPage">
+        <img src="{{ url_for('static', filename='ai.png') }}" alt="Logo">
+    </div>
+
+    <!-- 主页内容 -->
+    <main id="mainContent">
+        <header>
+            <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+                <div class="container-fluid">
+                    <a class="navbar-brand" href="#">
+                        <div class="logo">音艺智创 Metaverse Music Education</div>
+                    </a>
+
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+
+                    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                            <li class="nav-item"><a class="nav-link" href="{{ url_for('overview') }}">概览</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{ url_for('news') }}">新闻</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{ url_for('forum') }}">论坛</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{ url_for('learn') }}">学习</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{ url_for('charfront') }}">智能助手</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{ url_for('xiazai') }}">下载</a></li>
+                        </ul>
+
+                        <!-- 登录/用户名显示 -->
+                        <div class="d-flex">
+                            {% if session.get('username') %}
+                                <div class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        {{ session.get('username') }}
+                                    </a>
+                                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                                        <li><a class="dropdown-item" href="{{ url_for('user_setting') }}">设置</a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item" href="{{ url_for('logout') }}">退出</a></li>
+                                    </ul>
+                                </div>
+                            {% else %}
+                                <a class="btn btn-outline-light" href="/login" role="button">登录</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </nav>
+        </header>
+
+        <section class="hero">
+            <div class="content">
+                <h1>音艺智创，让梦想自由发声</h1>
+                <p>我们以元宇宙为纸，以音乐教育为墨，勾勒出前所未有的音乐学习蓝图。而你，将执起梦想之笔，在这张蓝图上绘就属于自己的音乐传奇。</p>
+                <button class="btn btn-outline-light"><a class="nav-link" href="/learn">开启音乐之旅</a></button>
+                <button class="btn btn-outline-light"><a class="nav-link" href="{{ url_for('forum') }}">进入论坛</a></button>
+            </div>
+            <img src="{{ url_for('static', filename='main_1.png') }}" alt="Unreal Engine Image">
+        </section>
+
+        <footer>
+            <p>&copy; 音艺智创</p>
+        </footer>
+    </main>
+
+     <script>
+        // 监听点击事件
+        document.addEventListener('click', function () {
+            const initialPage = document.getElementById('initialPage');
+            const mainContent = document.getElementById('mainContent');
+
+            // 当用户点击时，隐藏初始页面并显示主页内容
+            initialPage.style.opacity = '0';
+            mainContent.classList.add('visible');
+
+            // 延迟移除初始页面
+            setTimeout(() => {
+                initialPage.style.display = 'none';
+            }, 1000); // 1秒后移除
+        });
+    </script>
+</body>
+</html>

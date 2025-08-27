@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能助手</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* 设置导航栏的背景颜色为黑色 */
+        .navbar {
+            background-color: #000;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* 使Logo文字颜色为白色以提高可读性 */
+        .navbar .logo {
+            color: #fff;
+            font-size: 24px;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        /* 设置导航链接的文字颜色 */
+        .navbar .nav-link {
+            color: #fff !important; /* 使用!important确保覆盖Bootstrap默认样式 */
+            text-decoration: none;
+            margin: 0 15px;
+            font-size: 16px;
+        }
+
+        /* 当鼠标悬停或激活时，更改导航链接的颜色 */
+        .navbar .nav-link:hover,
+        .navbar .nav-link:focus,
+        .navbar .nav-link.active {
+            color: #ccc !important; /* 更浅的灰色 */
+        }
+
+        /* 设置搜索按钮和下载按钮的颜色 */
+        .btn-outline-success {
+            color: #000;
+            border-color: #fff;
+            background-color: #fff;
+            padding: 5px 15px;
+            border-radius: 20px;
+            text-decoration: none;
+        }
+        .btn-outline-success:hover {
+            background-color: #000;
+            color: #fff;
+        }
+
+        .btn-outline-primary {
+            color: #fff;
+            border-color: #fff;
+            background-color: transparent;
+            padding: 5px 15px;
+            border-radius: 20px;
+            text-decoration: none;
+        }
+        .btn-outline-primary:hover {
+            background-color: #fff;
+            color: #000;
+        }
+
+        /* 设置页面背景颜色为类似Unreal Engine的深色 */
+        body {
+            background-color: #0f0f14; /* 深色背景 */
+            color: #fff;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* 英雄部分的背景颜色或图片 */
+        .hero {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 100px 50px;
+            background-color: #0f0f14; /* 或者使用这种深色作为背景颜色 */
+            color: #fff;
+        }
+
+        .content {
+            width: 50%;
+            padding: 0 50px;
+        }
+
+        .hero img {
+            width: 50%;
+            height: auto;
+            border-radius: 10px;
+        }
+
+        /* 调整按钮样式 */
+        .btn-outline-light {
+            color: #fff;
+            border-color: #fff;
+            background-color: transparent;
+            padding: 10px 20px;
+            border-radius: 20px;
+            text-decoration: none;
+        }
+        .btn-outline-light:hover {
+            background-color: #fff;
+            color: #000;
+        }
+
+        /* 调整字体大小和样式 */
+        .hero h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+
+        .hero p {
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+
+        .hero button {
+            font-size: 14px;
+            padding: 10px 20px;
+        }
+
+        .search-input {
+            width: 200px; /* 调整宽度 */
+            height: 30px; /* 调整高度 */
+            padding: 5px 10px;
+            border-radius: 20px; /* 圆角 */
+            border: none;
+            outline: none;
+            background-color: #333; /* 背景颜色 */
+            color: white; /* 文字颜色 */
+            font-size: 14px;
+        }
+
+        .search-button {
+            width: 80px; /* 调整宽度 */
+            height: 30px; /* 调整高度 */
+            border-radius: 20px; /* 圆角 */
+            border: none;
+            background-color: #007bff; /* 背景颜色 */
+            color: white; /* 文字颜色 */
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .login-btn {
+            margin-left: 10px; /* 调整登录按钮的间距 */
+        }
+    </style>
+</head>
+<body>
+    <header>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{{ url_for('main') }}">
+                <div class="logo">音艺智创 Metaverse Music Education</div>
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('overview') }}">概览</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('news') }}">新闻</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('forum') }}">论坛</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('learn') }}">学习</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('charfront') }}" >智能助手</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('xiazai') }}" >下载</a></li>
+                </ul>
+
+                <!-- 登录/用户名显示 -->
+                <div class="d-flex">
+                    {% if session.get('username') %}
+                        <div class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                {{ session.get('username') }}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                                <li><a class="dropdown-item" href="{{ url_for('user_setting') }}">设置</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{{ url_for('logout') }}">退出</a></li> <!-- 确保有注销的路由 -->
+                            </ul>
+                        </div>
+                    {% else %}
+                        <a class="btn btn-outline-light" href="/login" role="button">登录</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+</header>
+
+    <section class="hero">
+        <div class="content">
+            <h1>智能助手</h1>
+            <p>依托deepseek模型前沿的智能技术和庞大的音乐知识体系，无论是复杂的音乐理论知识，还是神秘的音乐创作技巧，亦或是多变的音乐风格解析，它都能为您抽丝剥茧，精准且详尽地解答您在音乐方面的每一个疑惑，成为您探索音乐世界的得力伙伴。 </p>
+            <a href="/chat" class="btn btn-outline-light special-btn"><strong>开始对话</strong></a>
+        </div>
+        <img src="/static/ai.png" alt="……">
+    </section>
+</body>
+</html>

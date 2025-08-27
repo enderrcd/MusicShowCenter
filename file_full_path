@@ -1,0 +1,15 @@
+    @patch('app.get_db_connection')
+    def test_create_post_success(self, mock_get_db_connection):
+        with self.app.session_transaction() as sess:
+            sess['username'] = 'testuser'
+            sess['is_admin'] = 0
+            sess['id'] = 1
+
+        mock_conn = MagicMock()
+        mock_cursor = MagicMock()
+        mock_get_db_connection.return_value = mock_conn
+        mock_conn.cursor.return_value = mock_cursor
+        mock_cursor.fetchone.return_value = {'id': 1, 'is_muted': 0}
+
+        response = self.app.post('/create_post', data=dict(title='Test Title', body='Test Body'), follow_redirects=True)
+        self.assertIn('帖子创建成功！', response.data.decode('utf-8'))

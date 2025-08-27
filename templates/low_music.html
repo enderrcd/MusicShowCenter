@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>乐理启航</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+    body {
+        background-color: #000;
+        color: #ccc;
+        margin: 0;
+        padding: 0;
+    }
+
+    h1,
+    h2,
+    h3 {
+        color: #fff;
+    }
+
+    .sidebar {
+        position: fixed;
+        top: 56px;
+        left: 0;
+        height: calc(100vh - 56px);
+        width: 200px;
+        background-color: #000;
+        padding: 20px;
+        overflow-y: auto;
+        z-index: 1000; /* 确保导航栏在最上层 */
+    }
+
+    .sidebar ul {
+        list-style-type: none;
+        padding: 0;
+    }
+
+    .sidebar ul li {
+        margin-bottom: 10px;
+    }
+
+    .sidebar ul li a {
+        color: #fff;
+        text-decoration: none;
+    }
+
+    .main-content {
+        margin-left: 220px; /* 为侧边栏留出空间 */
+        padding: 20px;
+        padding-bottom: 80px; /* 为进度条留出空间 */
+        display: flex;
+        flex-direction: column;
+    }
+
+    #tutorialImage {
+        width: 100%; /* 设置图片宽度为容器宽度 */
+        max-width: 100%; /* 确保图片适应容器 */
+        height: 400px; /* 根据需要可以设置固定高度 */
+        margin-bottom: 20px;
+        opacity: 1;
+        transition: opacity 1s ease-in-out;
+        position: sticky; /* 图片跟随视角滚动 */
+        top: 0; /* 确保图片始终在顶部 */
+        z-index: 1000; /* 提高z-index以覆盖其他元素 */
+    }
+
+    #tutorialVideo {
+        width: 100%; /* 设置图片宽度为容器宽度 */
+        max-width: 100%; /* 确保图片适应容器 */
+        height: 400px; /* 根据需要可以设置固定高度 */
+        margin-bottom: 20px; /* 给图片和文本之间添加间距 */
+        opacity: 1;
+        transition: opacity 1s ease-in-out;
+        position: sticky; /* 图片跟随视角滚动 */
+        top: 0; /* 确保图片始终在顶部 */
+        z-index: 1000; /* 提高z-index以覆盖其他元素 */
+    }
+
+    .text-content {
+        flex-grow: 1; /* 让文本内容占据剩余所有空间 */
+    }
+
+    h2 {
+        cursor: pointer;
+        background-color: #444;
+        padding: 10px;
+        border-radius: 5px;
+        color: white;
+    }
+
+    .text-content p {
+        position: relative;
+        padding-left: 20px; /* 留出显示小圆点的空间 */
+        margin-bottom: 10px; /* 段落间距 */
+        cursor: pointer;
+    }
+
+    /* 默认的小圆点样式 */
+    .text-content p::before {
+        content: '';
+        position: absolute;
+        left: 5px;
+        top: 10px; /* 根据字体大小调整使小圆点垂直居中 */
+        width: 8px;
+        height: 8px;
+        background-color: gray;
+        border-radius: 50%;
+    }
+
+    /* 进度条容器 */
+    .progress-container {
+        position: fixed;
+        bottom: 0;
+        left: 200px; /* 与侧边栏宽度一致 */
+        width: calc(100% - 200px); /* 减去侧边栏宽度 */
+        background-color: #333; /* 进度条背景色 */
+        padding: 10px;
+        z-index: 999; /* 确保进度条在导航栏下方 */
+    }
+
+    .progress-bar {
+        width: 100%;
+    }
+
+    /* 点击后的样式 */
+    .text-content p.clicked {
+        background-color: white; /* 改变为你想要的亮色 */
+        color: black;
+    }
+
+    .text-content p.clicked::before {
+        background-color: #4CAF50; /* 改变为你想要的亮色 */
+    }
+</style>
+
+<body>
+    <!-- 导航栏 -->
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="{{ url_for('main') }}">
+                    <div class="logo">音艺智创 Metaverse Music Education</div>
+                </a>
+
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('overview') }}">概览</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('news') }}">新闻</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('forum') }}">论坛</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('learn') }}">学习</a></li>
+                        <li class="nav-item">
+                            <a class="nav-link" onclick="openPopup()" >钢琴</a>
+                        </li>
+                    </ul>
+
+                    <!-- 登录/用户名显示 -->
+                    <div class="d-flex">
+                        {% if session.get('username') %}
+                        <div class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                {{ session.get('username') }}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                                <li><a class="dropdown-item" href="{{ url_for('user_setting') }}">设置</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{{ url_for('logout') }}">退出</a></li>
+                            </ul>
+                        </div>
+                        {% else %}
+                        <a class="btn btn-outline-light" href="/login" role="button">登录</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="sidebar">
+        <ul>
+            <li><a href="#" onclick="scrollToAndDisplay('learn_staff')">认识五线谱</a></li>
+            <li><a href="#" onclick="scrollToAndDisplay('learn_note')">认识音符</a></li>
+            <li><a href="#" onclick="scrollToAndDisplay('learn_beat')">小节&拍号</a></li>
+            <li><a href ="#" onclick="scrollToAndDisplay('learn_break')">认识休止符</a></li>
+            <li><a href="#" onclick="scrollToAndDisplay('learn_dot')">认识附点和延音线</a></li>
+            <li><a href="#" onclick="scrollToAndDisplay('learn_up')">升号&降号</a></li>
+            <li><a href ="#" onclick="scrollToAndDisplay('learn_meter')">拍子类型</a></li>
+            <li><a href ="#" onclick="scrollToAndDisplay('learn_odd')">奇数节拍</a></li>
+        </ul>
+    </div>
+
+    <main class="main-content">
+        <div class="scroll-container">
+    <div class="progress-bar" id="progress-bar">
+        <div class="slider" id="slider"></div>
+    </div>
+</div>
+        <!-- 图片展示区域 -->
+        <img id="tutorialImage" src="/static/low_1.png" alt="教程相关图片">
+
+
+        <!-- 文字按钮区域 -->
+        <div class="text-content" id="text-container">
+
+            <video id="tutorialVideo" style="display:none;" width="300" height="200">
+                <source src="/static/low_49.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+            <video id="tutorialVideo" style="display:none;" width="300" height="200">
+                <source src="/static/low_54.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+            <video id="tutorialVideo" style="display:none;" width="300" height="200">
+                <source src="/static/low_75.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+            <video id="tutorialVideo" style="display:none;" width="300" height="200">
+                <source src="/static/low_79.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+            <video id="tutorialVideo" style="display:none;" width="300" height="200">
+                <source src="/static/low_81.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+            <div class="progress-container">
+        <input type="range" id="progressBar" min="0" max="100" value="0" class="progress-bar">
+    </div>
+            <h2 id="learn_staff">一、认识五线谱</h2>
+             <p data-step="1" data-func="changeImage('/static/low_1.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(1)" class="scroll-item"><strong>五线谱</strong>是音乐学习中记录音符的基础工具。</p>
+<p data-step="2" data-func="changeImage('/static/low_2.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(2)" class="scroll-item">它由五条平行横线和其间的四个间组成。每一条线和每一个间，都对应着键盘上的一个白键。</p>
+<p data-step="3" data-func="changeImage('/static/low_3.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(3)" class="scroll-item">接下来认识<strong>谱号</strong>。谱号的作用是为音符在五线谱上“定位”，把单个音符分配到特定的线或间。常见的谱号有高音谱号和低音谱号.</p>
+<p data-step="4" data-func="changeImage('/static/low_4.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(4)" class="scroll-item">我们先从高音谱号学起，它也叫G谱号。</p>
+<p data-step="5" data-func="changeImage('/static/low_5.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(5)" class="scroll-item">高音谱号形状独特，它环绕的那条线就是G音所在的位置，这条线以红色标示，方便识别。也就是说，只要把音符写在这条线上，它就是G音。</p>
+<p data-step="6" data-func="changeImage('/static/low_6.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(6)" class="scroll-item">G音上方的间里，对应的音符是A音（注意，音乐里没有“H”这个音哦）。</p>
+<p data-step="7" data-func="changeImage('/static/low_7.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(7)" class="scroll-item">再往上一条线，对应的音符是B音。</p>
+<p data-step="8" data-func="changeImage('/static/low_8.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(8)" class="scroll-item">按照这样的规律，从下往上，线和间依次对应不同的音。</p>
+<p data-step="9" data-func="changeImage('/static/low_9.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(9)" class="scroll-item">在记写音符过程中，可能会遇到空间不够的情况,这时候该怎么办呢？</p>
+<p data-step="10" data-func="changeImage('/static/low_10.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(10)" class="scroll-item">在五线谱记谱过程中，当空间不足时，<strong>加线（Ledger Lines）</strong>能帮我们解决难题。</p>
+<p data-step="11" data-func="changeImage('/static/low_11.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(11)" class="scroll-item">加线是一些短小的线条，当五线谱原有的线和间不够用，它可以延伸五线谱的范围。</p>
+<p data-step="12" data-func="changeImage('/static/low_12.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(12)" class="scroll-item">绘制加线后，我们就能继续放置音符，比如放置A音。</p>
+<p data-step="13" data-func="changeImage('/static/low_13.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(13)" class="scroll-item">接下来，我们学习低音谱号，也称为F谱号。</p>
+<p data-step="14" data-func="changeImage('/static/low_14.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(14)" class="scroll-item">低音谱号两个点之间所夹的五线谱线，对应的音是F。</p>
+<p data-step="15" data-func="changeImage('/static/low_15.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(15)" class="scroll-item">掌握了这个基准音后，我们就可以继续用音符填充其余的线和间。</p>
+<p data-step="16" data-func="changeImage('/static/low_16.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(16)" class="scroll-item">最后，我们来探讨<strong>大谱表（Grand Staff）</strong>。大谱表从理论上来说由11条线组成。</p>
+<p data-step="17" data-func="changeImage('/static/low_17.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(17)" class="scroll-item">当去掉中间的线，就会形成上下两个谱表。</p>
+<p data-step="18" data-func="changeImage('/static/low_18.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(18)" class="scroll-item">在上方谱表添加高音谱号，下方谱表添加低音谱号，我们便能清晰看到两个谱表之间的关系。</p>
+<p data-step="19" data-func="changeImage('/static/low_19.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(19)" class="scroll-item">值得注意的是，两个谱号之间由C音“连接”（以红色标示），这个C通常被称为“中央C”，因为它对应于大谱表的中间位置。 </p>
+<h2 id="learn_note">二、认识音符</h2>
+<p data-step="20" data-func="changeImage('/static/low_20.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(20)" class="scroll-item">一个音符被演奏的时长被称为<strong>音符时值</strong>，它由音符的类型决定。</p>
+<p data-step="21" data-func="changeImage('/static/low_21.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(21)" class="scroll-item">在现代音乐中，<strong>全音符</strong>的音符时值最长。</p>
+<p data-step="22" data-func="changeImage('/static/low_22.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(22)" class="scroll-item"><strong>二分音符</strong>的时值是全音符的一半。</p>
+<p data-step="23" data-func="changeImage('/static/low_23.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(23)" class="scroll-item">两个二分音符所占的时长与一个全音符相同。</p>
+<p data-step="24" data-func="changeImage('/static/low_24.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(24)" class="scroll-item"><strong>四分音符</strong>的时值是全音符的四分之一。</p>
+<p data-step="25" data-func="changeImage('/static/low_25.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(25)" class="scroll-item">四个四分音符所占的时长与一个全音符相同。两个四分音符的时值等于一个二分音符的时值。</p>
+<p data-step="26" data-func="changeImage('/static/low_26.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(26)" class="scroll-item">时值比四分音符短的音符带有<strong>符尾</strong>。每一条符尾将音符的时值减半。</p>
+<p data-step="27" data-func="changeImage('/static/low_27.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(27)" class="scroll-item"><strong>八分音符</strong>有一条符尾。</p>
+<p data-step="28" data-func="changeImage('/static/low_28.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(28)" class="scroll-item">因此，两个八分音符所占的时长与一个四分音符相同。</p>
+<p data-step="29" data-func="changeImage('/static/low_29.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(29)" class="scroll-item"><strong>十六分音符</strong>带有两条符尾，其音符时值再次减半。</p>
+<p data-step="30" data-func="changeImage('/static/low_30.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(30)" class="scroll-item">两个十六分音符的时值等于一个八分音符的时值。</p>
+<p data-step="31" data-func="changeImage('/static/low_31.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(31)" class="scroll-item">四个十六分音符所占时长与一个四分音符相同。</p>
+<p data-step="32" data-func="changeImage('/static/low_32.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(32)" class="scroll-item">虽然存在带有三条或更多符尾的音符，但它们在实际中很少使用。</p>
+<p data-step="33" data-func="changeImage('/static/low_33.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(33)" class="scroll-item">此图表展示了本课程中讨论的所有五种音符类型之间的关系。</p>
+<h2 id="learn_beat">三、小节&拍号</h2>
+<p data-step="34" data-func="changeImage('/static/low_34.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(34)" class="scroll-item">被称为<strong>小节线</strong>的垂直黑线，将五线谱划分成若干<strong>小节</strong>。</p>
+<p data-step="35" data-func="changeImage('/static/low_35.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(35)" class="scroll-item">这些小节可分为两种节拍。</p>
+<p data-step="36" data-func="changeImage('/static/low_36.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(36)" class="scroll-item"><strong>拍号</strong>规定了每个小节中音符的数量和类型。</p>
+<p data-step="37" data-func="changeImage('/static/low_37.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(37)" class="scroll-item">第一小节是 4/4 拍，第二小节是 3/4 拍。</p>
+<p data-step="38" data-func="changeImage('/static/low_38.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(38)" class="scroll-item">第一小节（4/4 拍）包含四个四分音符。</p>
+<p data-step="39" data-func="changeImage('/static/low_39.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(39)" class="scroll-item">第二小节（3/4 拍）包含三个四分音符。</p>
+<p data-step="40" data-func="changeImage('/static/low_40.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(40)" class="scroll-item">接下来，我们将探讨非以四分音符为一拍的拍号。</p>
+<p data-step="41" data-func="changeImage('/static/low_41.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(41)" class="scroll-item">6/8 拍意味着每小节包含六个八分音符。</p>
+<p data-step="42" data-func="changeImage('/static/low_42.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(42)" class="scroll-item">3/2 拍表示每小节包含三个二分音符。</p>
+<p data-step="43" data-func="changeImage('/static/low_43.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(43)" class="scroll-item">此图表呈现了我们所讨论过的所有拍号。</p>
+            <h2 id="learn_break">四、认识休止符</h2>
+<p data-step="44" data-func="changeImage('/static/low_44.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(44)" class="scroll-item"><strong>休止符</strong>代表小节中的无声时段。</p>
+<p data-step="45" data-func="changeImage('/static/low_45.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(45)" class="scroll-item">每种休止符都与相应类型的音符具有相同的时值。</p>
+<p data-step="46" data-func="changeImage('/static/low_46.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(46)" class="scroll-item">例如，<strong>四分休止符</strong>和四分音符所占时长相同。</p>
+<p data-step="47" data-func="changeImage('/static/low_47.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(47)" class="scroll-item">音符发声时有声响，而休止符则是无声的。</p>
+<p data-step="48" data-func="changeImage('/static/low_48.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(48)" class="scroll-item">为了说明这一点，我们用四分音符填满 4/4 拍的小节。</p>
+            <p data-step="49" id="triggerElement" data-func="playVideo('/static/low_49.mp4'); toggleHighlight(this)"  onclick="eval((this.getAttribute('data-func'))); updateProgress(49)" class="scroll-item">演奏时，这四个音符都会发声。</p>
+           <p data-step="50" data-func="changeImage('/static/low_53.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(50)" class="scroll-item">接下来，我们将第二个四分音符替换为四分休止符。</p>
+<p data-step="51" id="triggerElement" data-func="playVideo('/static/low_54.mp4'); toggleHighlight(this)"  onclick="eval((this.getAttribute('data-func'))); updateProgress(51)" class="scroll-item" >演奏时，第二个节拍就变为无声了。</p>
+<p data-step="52" data-func="changeImage('/static/low_58.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(52)" class="scroll-item">下面，我们来探讨其他类型的休止符。</p>
+<p data-step="53" data-func="changeImage('/static/low_59.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(53)" class="scroll-item"><strong>全休止符</strong>与全音符所占时长相同。</p>
+<p data-step="54" data-func="changeImage('/static/low_60.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(54)" class="scroll-item">它被画成一个从第四线向下悬挂的小方块。</p>
+<p data-step="55" data-func="changeImage('/static/low_61.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(55)" class="scroll-item"><strong>二分休止符（半休止符）</strong>与二分音符的时值相同。</p>
+<p data-step="56" data-func="changeImage('/static/low_62.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(56)" class="scroll-item">它被绘制为一个从五线谱中间的线向上升起的小方块。</p>
+<p data-step="57" data-func="changeImage('/static/low_63.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(57)" class="scroll-item">和音符一样，休止符也可以有符尾（标志）。</p>
+<p data-step="58" data-func="changeImage('/static/low_64.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(58)" class="scroll-item">带有一条符尾的<<strong>八分休止符</strong>，其时长与八分音符相同。</p>
+<p data-step="59" data-func="changeImage('/static/low_65.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(59)" class="scroll-item">带有两条符尾的<strong>十六分休止符</strong>，其时长与十六分音符相同。</p>
+<p data-step="60" data-func="changeImage('/static/low_66.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(60)" class="scroll-item">虽然较为少见，但休止符可以有三条或更多符尾。</p>
+<p data-step="61" data-func="changeImage('/static/low_67.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(61)" class="scroll-item">可将此图表作为休止符时值的参考。</p>
+<h2 id="learn_dot">五、认识附点和延音线</h2>
+<p data-step="62" data-func="changeImage('/static/low_68.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(62)" class="scroll-item"><strong>附点</strong>和<strong>延音线</strong>是两种用于改变音符时值的标记。</p>
+<p data-step="63" data-func="changeImage('/static/low_69.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(63)" class="scroll-item">附点使音符的时值增加一半。</p>
+<p data-step="64" data-func="changeImage('/static/low_70.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(64)" class="scroll-item">因为八分音符的时值是四分音符的一半，所以我们可以用 1/2 来示意这种时长关系。</p>
+<p data-step="65" data-func="changeImage('/static/low_71.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(65)" class="scroll-item">如你所见，附点四分音符的时值等于一个四分音符加上一个八分音符。</p>
+<p data-step="66" data-func="changeImage('/static/low_72.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(66)" class="scroll-item">一个附点四分音符也等同于三个八分音符的时值。</p>
+<p data-step="67" data-func="changeImage('/static/low_73.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(67)" class="scroll-item">延音线（Ties）用于连接音高相同的多个音符。</p>
+<p data-step="68" data-func="changeImage('/static/low_74.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(68)" class="scroll-item">它们让音符的时值能够跨越小节线等界限。</p>
+<p data-step="69" id="triggerElement" data-func="playVideo('/static/low_75.mp4'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(69)" class="scroll-item">例如，这里第四个音符和第五个音符现在通过延音线合并为一个更长时值的音符。</p>
+<p data-step="70" data-func="changeImage('/static/low_76.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(70)" class="scroll-item">如果没有小节线分隔，我们可以直接写成一个较长时值的音符（比如二分音符等，视具体情况而定 ）。</p>
+<p data-step="71" data-func="changeImage('/static/low_77.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(71)" class="scroll-item">可将此图表作为附点相关知识的参考。</p>
+<h2 id="learn_up">六、升号&降号</h2>
+<p data-step="72" data-func="changeImage('/static/low_78.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(72)" class="scroll-item"><strong>半音阶</strong>（或 “半音”）指的是键盘上从一个琴键到相邻下一个琴键的距离。</p>
+<p data-step="73" id="triggerElement" data-func="playVideo('/static/low_81.mp4'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(73)" class="scroll-item">比如，琴键 1 到琴键 2 就是半音，因为它们彼此相邻。</p>
+<p data-step="74" data-func="changeImage('/static/low_80.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(74)" class="scroll-item">半音程并非总是从白键到黑键。</p>
+<p data-step="75" id="triggerElement" data-func="playVideo('/static/low_79.mp4'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(75)" class="scroll-item">在此示例中，琴键 1 和琴键 2 依旧相邻。</p>
+<p data-step="76" data-func="changeImage('/static/low_80.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(76)" class="scroll-item">一个<strong>全音程</strong>（或 “全音”，简称 “音”）的距离等同于两个半音程。</p>
+<p data-step="77" id="triggerElement" data-func="playVideo('/static/low_83.mp4'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(77)" class="scroll-item">琴键 1 到琴键 3 就是一个全音。</p>
+<p data-step="78" data-func="changeImage('/static/low_82.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(78)" class="scroll-item">其中，琴键 1 到琴键 2 是前半音，琴键 2 到琴键 3 是后半音。</p>
+<p data-step="79" data-func="changeImage('/static/low_83.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(79)" class="scroll-item"><strong>临时记号</strong>是用于升高或降低音符音高的符号。</p>
+<p data-step="80" data-func="changeImage('/static/low_84.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(80)" class="scroll-item">我们首先要讨论的临时记号是<strong>降号（flat）</strong>和<strong>升号（sharp）</strong>。</p>
+<p data-step="81" data-func="changeImage('/static/low_85.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(81)" class="scroll-item">降号将音符降低半音，而升号将音符升高半音。</p>
+<p data-step="82" data-func="changeImage('/static/low_86.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(82)" class="scroll-item">在书写时，可以用<strong> “#” 表示升号，用 “b” 表示降号</strong>。</p>
+<p data-step="83" data-func="changeImage('/static/low_87.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(83)" class="scroll-item">我们来看一下 C 和 D 之间的黑键。</p>
+<p data-step="84" data-func="changeImage('/static/low_88.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(84)" class="scroll-item">这个键可以称作 C#，因为它比 C 高半音。</p>
+<p data-step="85" data-func="changeImage('/static/low_89.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(85)" class="scroll-item">它也可以叫做 Db，因为它比 D 低半音。</p>
+<p data-step="86" data-func="changeImage('/static/low_90.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(86)" class="scroll-item">另一个例子是 E 和 F。</p>
+<p data-step="87" data-func="changeImage('/static/low_91.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(87)" class="scroll-item">E 也可以称为 Fb，因为它比 F 低半音。</p>
+<p data-step="88" data-func="changeImage('/static/low_93.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(88)" class="scroll-item">同样，F 可以称为 E#。</p>
+<p data-step="89" data-func="changeImage('/static/low_93.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(89)" class="scroll-item">每当某个音高有多个名称时，这就被称为<strong>等音异名</strong>（等音拼写）。</p>
+<p data-step="90" data-func="changeImage('/static/low_95.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(90)" class="scroll-item">接下来，我们讨论一下<strong>重降号</strong>（double flat）和<strong>重升号</strong>（double sharp）。</p>
+<p data-step="91" data-func="changeImage('/static/low_96.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(91)" class="scroll-item">书写时，可以用 <strong>“x” 表示重升号，用 “bb” 表示重降号。</strong></p>
+<p data-step="92" data-func="changeImage('/static/low_97.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(92)" class="scroll-item">例如，D 和 Ebb 具有相同的音高，因为从 E 向下移动一个全音（或两个半音）就能得到 D。</p>
+<p data-step="93" data-func="changeImage('/static/low_98.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(93)" class="scroll-item">D 听起来也与 Cx 相同，因为它比 C 高出一个全音。</p>
+<p data-step="94" data-func="changeImage('/static/low_100.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(94)" class="scroll-item">最后，还<strong>原记号</strong>（natural）会取消任何临时记号，使音符回到其原本在白键上的音高。</p>
+            <h2 id="learn_meter">七、拍子类型</h2>
+<p data-step="95" data-func="changeImage('/static/low_101.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(95)" class="scroll-item">每个拍号都可以归属于一定的<strong>节拍类型</strong>。</p>
+<p data-step="96" data-func="changeImage('/static/low_102.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(96)" class="scroll-item">术语 “<strong>二拍子（duple）</strong>”、“<strong>三拍子（triple）</strong>” 和 “<strong>四拍子（quadruple）</strong>” 指的是每小节中的节拍数量。</p>
+<p data-step="97" data-func="changeImage('/static/low_103.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(97)" class="scroll-item">术语 “<strong>单拍子（simple）</strong>” 意味着这些节拍中的每一拍都可以再细分为两个音符。</p>
+<p data-step="98" data-func="changeImage('/static/low_104.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(98)" class="scroll-item">例如，2/4 拍被归类为<strong>单二拍子</strong>。</p>
+<p data-step="99" data-func="changeImage('/static/low_105.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(99)" class="scroll-item">“二拍子（Duple）” 表示每小节有两拍。</p>
+<p data-step="100" data-func="changeImage('/static/low_106.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(100)" class="scroll-item">“单拍子（Simple）” 表明这些拍子中的每一拍都能分成两个音符。</p>
+<p data-step="101" data-func="changeImage('/static/low_107.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(101)" class="scroll-item">2/2 拍和 2/8 拍也属于单二拍子。</p>
+<p data-step="102" data-func="changeImage('/static/low_108.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(102)" class="scroll-item">3/4 拍被归类为<strong>单三拍子</strong>。</p>
+<p data-step="103" data-func="changeImage('/static/low_109.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(103)" class="scroll-item">“三拍子（Triple）” 指的是每小节有三拍。</p>
+<p data-step="104" data-func="changeImage('/static/low_110.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(104)" class="scroll-item">同样，“单拍子（simple）” 表示这些拍子中的每一拍都可以细分为两个音符。</p>
+<p data-step="105" data-func="changeImage('/static/low_111.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(105)" class="scroll-item">3/2 拍和 3/8 拍也属于单三拍子。</p>
+<p data-step="106" data-func="changeImage('/static/low_112.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(106)" class="scroll-item">4/4 拍被归类为<strong>单四拍子</strong>，因为它每小节有四拍，且每一拍都能分成两个音符。</p>
+<p data-step="107" data-func="changeImage('/static/low_113.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(107)" class="scroll-item">4/2 拍和 4/8 拍也属于单四拍子。</p>
+<p data-step="108" data-func="changeImage('/static/low_114.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(108)" class="scroll-item">请注意，单拍子（Simple Meter）中拍号的上方数字始终是 2、3 或 4 。</p>
+<p data-step="109" data-func="changeImage('/static/low_115.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(109)" class="scroll-item">单拍子中的一拍可细分为两个音符，而复合拍子中的一拍则细分为三个音符。</p>
+<p data-step="110" data-func="changeImage('/static/low_116.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(110)" class="scroll-item">为了说明这一点，我们来看 6/8 拍。</p>
+<p data-step="111" data-func="changeImage('/static/low_117.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(111)" class="scroll-item">六个八分音符可以划分为两拍（<strong>复二拍子</strong>）或三拍（<strong>单三拍子</strong>）。</p>
+<p data-step="112" data-func="changeImage('/static/low_118.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(112)" class="scroll-item">由于单三拍子模式已属于 3/4 拍，所以 6/8 拍是复二拍子。</p>
+<p data-step="113" data-func="changeImage('/static/low_119.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(113)" class="scroll-item">请注意，6/8 拍中的每一拍都是一个附点四分音符。实际上，所有复合拍子都会包含一些附点音符作为其节拍单位。</p>
+<p data-step="114" data-func="changeImage('/static/low_120.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(114)" class="scroll-item">任何拍号上方数字为 6 的，都是复二拍子。6/8 拍和 6/4 拍是最常用的。</p>
+<p data-step="115" data-func="changeImage('/static/low_121.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(115)" class="scroll-item">9/8 拍被归类为<strong>复三拍子</strong>。</p>
+<p data-step="116" data-func="changeImage('/static/low_122.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(116)" class="scroll-item">它有三拍（三个附点四分音符），因而节拍为三重性。</p>
+<p data-step="117" data-func="changeImage('/static/low_123.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(117)" class="scroll-item">由于每一拍都由三个音符组成，所以它是复合拍子。</p>
+<p data-step="118" data-func="changeImage('/static/low_124.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(118)" class="scroll-item">任何拍号上方数字为 9 的，都是复三拍子。虽然 9/8 拍最为常见，但也可使用 9/2 拍、9/4 拍和 9/16 拍。</p>
+<p data-step="119" data-func="changeImage('/static/low_125.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(119)" class="scroll-item">最后，12/8 拍被归类为<strong>复四拍子</strong>。</p>
+<p data-step="120" data-func="changeImage('/static/low_126.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(120)" class="scroll-item">它有四拍，所以是四拍子类型。</p>
+<p data-step="121" data-func="changeImage('/static/low_127.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(121)" class="scroll-item">由于每一拍都由三个音符构成，所以这种节拍属于复合拍子。</p>
+<p data-step="122" data-func="changeImage('/static/low_128.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(122)" class="scroll-item">任何拍号上方数字为 12 的，均为复四拍子。12/8 拍和 12/16 拍是最为常用的。 </p>
+<h2 id="learn_odd">八、奇数节拍</h2>
+<p data-step="123" data-func="changeImage('/static/low_129.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(123)" class="scroll-item">奇数节拍是同时包含单拍子和复拍子的节拍类型。</p>
+<p data-step="124" data-func="changeImage('/static/low_130.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(124)" class="scroll-item">我们首先要讨论的奇数节拍是 5/8 拍。它包含一个单拍子和一个复拍子。</p>
+<p data-step="125" data-func="changeImage('/static/low_131.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(125)" class="scroll-item">节拍的顺序无关紧要。即使复拍子先出现，它依然是 5/8 拍。</p>
+<p data-step="126" data-func="changeImage('/static/low_132.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(126)" class="scroll-item">接下来，我们探讨有三个总拍数的奇数节拍。</p>
+<p data-step="127" data-func="changeImage('/static/low_133.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(127)" class="scroll-item">7/8 拍包含两个单拍子和一个复拍子。</p>
+<p data-step="128" data-func="changeImage('/static/low_134.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(128)" class="scroll-item">同样，节拍出现的顺序并不重要。</p>
+<p data-step="129" data-func="changeImage('/static/low_135.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(129)" class="scroll-item">复拍子甚至可以位于两个单拍子之间。</p>
+<p data-step="130" data-func="changeImage('/static/low_136.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(130)" class="scroll-item">8/8 拍包含两个复拍子和一个单拍子。</p>
+<p data-step="131" data-func="changeImage('/static/low_137.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(131)" class="scroll-item">有时人们会混淆 8/8 拍和 4/4 拍，因为二者都有 8 个八分音符。</p>
+<p data-step="132" data-func="changeImage('/static/low_138.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(132)" class="scroll-item">请注意，4/4 拍将小节划分为四个由两个八分音符组成的拍子（单四拍子），而 8/8 拍则将其划分为三个奇数节拍。</p>
+<p data-step="133" data-func="changeImage('/static/low_140.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(133)" class="scroll-item">最后要介绍的两种奇数节拍，总共有四拍。</p>
+<p data-step="134" data-func="changeImage('/static/low_141.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(134)" class="scroll-item">10/8 拍包含两个复拍子和两个单拍子。</p>
+<p data-step="135" data-func="changeImage('/static/low_142.png'); toggleHighlight(this)" onclick="eval((this.getAttribute('data-func'))); updateProgress(135)" class="scroll-item">11/8 拍包含三个复拍子和一个单拍子。</p>
+
+        </div>
+    </main>
+
+<script>
+    // 更换图片的函数（直接切换图片）
+    function changeImage(src) {
+        var img = document.getElementById('tutorialImage');
+        img.src = src; // 直接设置图片的src属性
+    }
+
+    // 高亮显示点击的元素
+    function toggleHighlight(element) {
+        // 移除所有段落的高亮
+        document.querySelectorAll('.text-content p').forEach(p => p.classList.remove('clicked'));
+        // 高亮当前点击的段落
+        element.classList.toggle('clicked');
+    }
+
+    // 打开弹出窗口
+    function openPopup() {
+        window.open('https://www.musictheory.net/piano', 'popupWindow', 'width=800px,height=300px');
+    }
+
+    // 播放视频
+    function playVideo(src) {
+        var videoElement = document.getElementById('tutorialVideo');
+        var imgElement = document.getElementById('tutorialImage');
+        videoElement.src = src;
+        videoElement.style.display = 'block';
+        imgElement.style.display = 'none';
+        videoElement.play();
+        videoElement.addEventListener('ended', function () {
+            // 当视频播放结束时，隐藏视频元素并重新显示图片
+            videoElement.style.display = 'none';
+            imgElement.style.display = 'block';
+        }, false);
+    }
+
+    // 滚动到指定部分并显示
+    function scrollToAndDisplay(sectionId) {
+        event.preventDefault(); // 防止默认行为
+        var targetSection = document.getElementById(sectionId);
+        if (!targetSection) return; // 如果找不到目标部分，直接返回
+
+        // 显示目标部分
+        targetSection.style.display = 'block';
+
+        // 计算目标标题相对于视口顶部的目标位置
+        var fixedOffsetFromTop = 400;
+        var targetPosition = targetSection.getBoundingClientRect().top + window.scrollY - fixedOffsetFromTop;
+
+        // 平滑滚动到指定位置
+        window.scrollTo({
+            top: targetPosition,
+            behavior: 'smooth'
+        });
+    }
+
+    // 进度条功能
+    document.addEventListener('DOMContentLoaded', function () {
+        const progressBar = document.getElementById('progressBar');
+        const paragraphs = document.querySelectorAll('.text-content p');
+        const totalParagraphs = paragraphs.length;
+
+        // 设置进度条的最大值为段落数量减一
+        progressBar.max = totalParagraphs - 1;
+
+        // 点击段落时更新进度条
+        paragraphs.forEach((paragraph, index) => {
+            paragraph.addEventListener('click', () => {
+                progressBar.value = index; // 更新进度条的值
+                toggleHighlight(paragraph); // 高亮当前段落
+            });
+        });
+
+        // 拖拽或点击进度条时跳转到相应段落并触发点击事件
+        progressBar.addEventListener('input', () => {
+            const index = progressBar.value;
+            const targetParagraph = paragraphs[index];
+            if (targetParagraph) {
+                // 滚动到目标段落
+                targetParagraph.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+                // 手动触发目标段落的点击事件
+                targetParagraph.click(); // 这会调用 toggleHighlight 和 changeImage
+            }
+        });
+
+        // 键盘事件监听
+        document.addEventListener('keydown', (event) => {
+            const currentValue = parseInt(progressBar.value);
+            let newValue;
+
+            if (event.key === 'ArrowLeft') {
+                // 左键：减少进度条值
+                newValue = Math.max(currentValue - 1, 0);
+                event.preventDefault(); // 阻止默认行为
+            } else if (event.key === 'ArrowRight') {
+                // 右键：增加进度条值
+                newValue = Math.min(currentValue + 1, totalParagraphs - 1);
+                event.preventDefault(); // 阻止默认行为
+            } else {
+                return; // 如果不是左右键，直接返回
+            }
+
+            // 更新进度条的值
+            progressBar.value = newValue;
+
+            // 触发进度条的 input 事件
+            progressBar.dispatchEvent(new Event('input'));
+        });
+    });
+</script>
+
+</body>
+
+</html>

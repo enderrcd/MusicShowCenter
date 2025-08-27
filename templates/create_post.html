@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>发布帖子</title>
+    <!-- 引入Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- 自定义CSS -->
+    <style>
+        /* 设置深黑色背景 */
+        body {
+            background-color: #0f0f14; /* 深色背景 */
+            color: #e0e0e0; /* 浅灰色文字 */
+            font-family: 'Roboto', sans-serif; /* 现代化字体 */
+            margin: 0;
+            padding: 0;
+            height: 100vh; /* 视窗高度 */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        /* 标题 */
+        h1 {
+            text-align: center;
+            color: #e0e0e0;
+            margin-bottom: 20px;
+        }
+
+        /* 表单容器 */
+        .form-container {
+            width: calc(100vw * 5 / 6); /* 占据屏幕的5/6宽度 */
+            max-width: 100%; /* 确保在小屏幕上不会超出 */
+            background-color: #2c2c2c; /* 深灰色背景 */
+            border-radius: 5px;
+            padding: 20px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 100px); /* 考虑到页面其他元素，减去一些高度 */
+            overflow: hidden; /* 防止内容溢出 */
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            height: 100%; /* 使表单占据整个容器高度 */
+            width: 100%; /* 使表单占据整个容器宽度 */
+        }
+
+        label {
+            display: block;
+            margin-top: 10px;
+            color: #e0e0e0; /* 文字颜色 */
+        }
+
+        input[type="text"], textarea {
+            width: 100%; /* 使输入框占据整个容器宽度 */
+            padding: 10px;
+            margin-top: 5px;
+            border: none;
+            border-radius: 4px;
+            background-color: #1a1a1a; /* 更深的背景色 */
+            color: #e0e0e0; /* 文字颜色 */
+            box-sizing: border-box; /* 确保padding和border包含在元素的总宽度和高度内 */
+        }
+
+        textarea {
+            flex-grow: 1; /* 让textarea占据剩余的所有空间 */
+            resize: none; /* 禁止用户手动调整大小 */
+        }
+
+        /* 创建新帖按钮样式 */
+        button[type="submit"] {
+            background-color: #2c2c2c; /* 设置为深灰色 */
+            border: none;
+            color: #e0e0e0; /* 文字颜色 */
+            padding: 10px 20px;
+            margin-top: 20px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        button[type="submit"]:hover {
+            background-color: #444; /* 鼠标悬停时更深的颜色 */
+        }
+
+        /* 返回论坛链接 */
+        a {
+            color: #e0e0e0; /* 浅灰色文字 */
+            text-decoration: none;
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+<h1>发布新帖</h1>
+<div class="form-container">
+    <form action="{{ url_for('create_post') }}" method="post">
+        <label for="title">标题:</label>
+        <input type="text" id="title" name="title" required>
+        <label for="body">正文:</label>
+        <textarea id="body" name="body" required></textarea>
+        <button type="submit">发布帖子</button>
+    </form>
+    <a href="{{ url_for('forum') }}">回到论坛</a>
+</div>
+</body>
+</html>

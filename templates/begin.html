@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>音艺智创 - 快速入门指南</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../static/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"></script>
+    <style>
+        body {
+            background-color: #000;
+            color: #ccc;
+        }
+
+        h1,
+        h2,
+        h3 {
+            color: #fff;
+        }
+
+       .sidebar {
+            position: fixed;
+            top: 56px;
+            left: 0;
+            height: calc(100vh - 56px);
+            width: 200px;
+            background-color: #000;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+       .sidebar ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+       .sidebar ul li {
+            margin-bottom: 10px;
+        }
+
+       .sidebar ul li a {
+            color: #fff;
+            text-decoration: none;
+        }
+
+       .main-content {
+            margin-left: 220px;
+            padding: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="{{ url_for('main') }}">
+                    <div class="logo">音艺智创 Metaverse Music Education</div>
+                </a>
+
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('overview') }}">概览</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('news') }}">新闻</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('forum') }}">论坛</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('learn') }}">学习</a></li>
+                    </ul>
+
+                    <!-- 登录/用户名显示 -->
+                    <div class="d-flex">
+                        {% if session.get('username') %}
+                        <div class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                {{ session.get('username') }}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                                <li><a class="dropdown-item" href="{{ url_for('user_setting') }}">设置</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{{ url_for('logout') }}">退出</a></li>
+                            </ul>
+                        </div>
+                        {% else %}
+                        <a class="btn btn-outline-light" href="/login" role="button">登录</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="sidebar">
+        <ul>
+            <li><a href="#registration-login">注册与登录</a></li>
+            <li><a href="#theoretical-study">理论知识学习</a></li>
+            <li><a href="#interactive-learning">互动学习</a></li>
+            <li><a href="#forum-rules">音乐论坛使用规范</a></li>
+        </ul>
+    </div>
+
+    <main class="main-content">
+        <h1>音艺智创快速入门指南</h1>
+        <h2 id="registration-login">一、注册与登录</h2>
+        <p>打开音艺智创，点击注册按钮，按照提示填写用户名、密码基本信息完成注册。注册成功后，输入账号和密码登录平台。登录后，即可开始学习之旅</p>
+
+        <h2 id="theoretical-study">二、理论知识学习</h2>
+        <p>登录后在主界面找到“学习”，进入学习库，您可以学习基础乐理知识，像音符、节拍、音阶等内容；点击“乐器历史与发展”，了解各类乐器的起源、演变和文化背景；点击“流行歌曲乐谱”，查看和学习流行歌曲的曲谱。</p>
+
+        <h2 id="interactive-learning">三、互动学习</h2>
+        <h3>（一）选择乐器</h3>
+        <p>进入“互动学习模块”，点击“演奏”，在乐器选择界面，根据个人兴趣选择想要学习的乐器，如钢琴、吉他等。选择后，系统会自动展示该乐器的相关课程和练习内容。</p>
+        <h3>（二）进入虚拟教室</h3>
+        <p>佩戴好VR设备，点击“进入虚拟教室”。进入后，您会置身于沉浸式的虚拟音乐教室环境，在这里可以看到虚拟乐器、教学场景等。</p>
+        <h3>（三）开始演奏</h3>
+        <p>在虚拟教室中，按照课程指导或练习要求进行演奏。演奏过程中，软件会实时捕捉您的演奏数据，包括音符准确性、节奏把握等，并进行分析。</p>
+        <h3>（四）音乐点播与知识学习</h3>
+        <p>在“互动学习模块”中，您还可以使用“音乐点播”功能，选择喜欢的音乐进行播放欣赏；通过“音乐历史知识点播”，学习音乐历史上的重要事件、人物等知识。</p>
+        <h3>（五）演奏评分与反馈</h3>
+        <p>完成演奏后，系统会即时给出评分，并从演奏技巧、节奏、音准等方面提供反馈和改进建议。根据这些反馈，您可以调整练习内容，系统会相应地动态更新学习计划。同时，您可以随时点击“查看进度”，了解自己的演奏准确度、练习时间和技术掌握情况。</p>
+
+        <h2 id="forum-rules">四、音乐论坛使用规范</h2>
+        <p>平台的“音乐论坛”为大家提供了交流音乐学习心得、分享经验的空间，请您在使用时遵守以下规则：</p>
+        <h3>（一）文明交流</h3>
+        <p>所有用户在论坛发言时，必须使用文明、友善的语言，不得发布辱骂、诋毁、歧视、挑衅等不文明言论，尊重每一位用户的人格和观点。</p>
+        <h3>（二）主题相关</h3>
+        <p>发布的帖子应与音乐学习、平台使用、乐器演奏等相关内容紧密联系。禁止发布与音乐教育无关的广告、推销信息，以及政治、宗教类敏感话题。</p>
+        <h3>（三）原创与引用规范</h3>
+        <p>鼓励发布原创内容，如学习心得、演奏技巧分享等。若引用他人内容，需注明出处。禁止抄袭他人作品，一经发现，将视情节严重程度给予警告、禁言等处理。</p>
+        <h3>（四）保护隐私</h3>
+        <p>不得在论坛上泄露他人隐私信息，包括但不限于姓名、联系方式、家庭住址等。同时，也要注意保护自己的隐私，避免在公共论坛发布敏感个人信息。</p>
+        <h3>（五）积极互动</h3>
+        <p>倡导积极向上的互动氛围，鼓励用户之间相互帮助、共同进步。对于他人的提问，应尽量提供有价值的回复和建议；对于不同观点，应理性讨论，避免争吵。</p>
+        <h3>（六）遵守管理</h3>
+        <p>论坛管理员有权对违规帖子进行删除、编辑或移动处理。用户应遵守管理员的管理决定，若对管理行为有异议，可通过合理渠道反馈，不得恶意对抗。</p>
+        <h3>（七）未成年人保护</h3>
+        <p>平台重视未成年人保护，禁止发布任何危害未成年人身心健康的内容。若发现有未成年人发布不适当内容，管理员有权进行引导和处理。</p>
+    </main>
+
+    <footer>
+        <p>&copy; 音艺智创</p>
+    </footer>
+</body>
+
+</html>
